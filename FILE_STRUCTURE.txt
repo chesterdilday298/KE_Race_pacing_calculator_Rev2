@@ -1,0 +1,77 @@
+📁 KEYSTONE RACE CALCULATOR - FILE STRUCTURE
+==============================================
+
+keystone-race-calculator/
+│
+├── 📄 START_HERE.md              ← READ THIS FIRST! Complete deployment guide
+├── 📄 DEPLOYMENT_GUIDE.md        ← Quick 5-step deployment reference
+├── 📄 README.md                  ← Full project documentation
+│
+├── 📄 package.json               ← Dependencies & scripts (REQUIRED)
+├── 📄 next.config.js             ← Next.js configuration (REQUIRED)
+├── 📄 .gitignore                 ← Git ignore rules (REQUIRED)
+│
+├── 📁 app/                       ← Main application folder (REQUIRED)
+│   ├── 📄 layout.js              ← Layout with Analytics & Speed Insights
+│   ├── 📄 page.js                ← Calculator component (main app logic)
+│   └── 📄 globals.css            ← Global styles & responsive design
+│
+└── 📁 public/                    ← Public assets folder
+    └── 📄 README.md              ← Placeholder for future assets
+
+
+UPLOAD ALL OF THESE FILES TO GITHUB!
+=====================================
+
+Required for Vercel deployment:
+✅ app/ folder (all 3 files inside)
+✅ package.json
+✅ next.config.js
+✅ .gitignore
+
+Recommended to upload:
+✅ README.md
+✅ DEPLOYMENT_GUIDE.md
+✅ START_HERE.md
+✅ public/ folder
+
+
+FILE SIZES (approximate):
+=========================
+app/page.js       → 157 KB (main calculator)
+app/layout.js     → 1 KB (Analytics setup)
+app/globals.css   → 2 KB (styles)
+package.json      → 1 KB (dependencies)
+Other files       → <1 KB each
+
+Total: ~161 KB (very small, fast deployment!)
+
+
+VERCEL ANALYTICS INTEGRATION:
+==============================
+
+Location: app/layout.js
+Lines: 1-2 (imports), 16-17 (components)
+
+Automatically tracks:
+✅ Page views
+✅ Visitors (unique & total)
+✅ Geographic data
+✅ Traffic sources
+✅ Device types
+✅ Browser stats
+✅ Core Web Vitals
+✅ Performance metrics
+
+No additional setup needed!
+Analytics work immediately upon deployment.
+
+
+NEXT STEPS:
+===========
+
+1. Open START_HERE.md
+2. Follow the deployment steps
+3. Upload to GitHub
+4. Deploy to Vercel
+5. Your calculator is live! 🎉
