@@ -2378,8 +2378,8 @@ ${'='.repeat(60)}
                     </div>
                   </div>
 
-                  {/* WHAT IF SECTION - Only for triathlon fitness approach */}
-                  {results.approach === 'fitness' && (
+                  {/* ADJUST PACING SECTION - For all triathlon approaches */}
+                  {raceTypes[results.raceType].type === 'triathlon' && (
                     <div style={{ marginBottom: '30px', padding: '20px', background: 'white', borderRadius: '12px', border: '2px solid #e0e0e0' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                         <h3 style={{ fontSize: '20px', color: colors.primary, fontWeight: '700', margin: 0 }}>
