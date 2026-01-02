@@ -1137,7 +1137,7 @@ ${'='.repeat(60)}
                 Step 1: Choose Your Race Type
               </h2>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', padding: '0 2px' }}>
                 <div
                   onClick={() => updateFormData('raceCategory', 'triathlon')}
                   style={{
@@ -2742,9 +2742,9 @@ ${'='.repeat(60)}
                   <div style={{ marginBottom: '8px' }}>• Unlimited communication and bi-weekly coaching calls</div>
                   <div>• Access to metabolic assessments and video form analysis</div>
                 </div>
-                <div style={{ display: 'inline-block', padding: '16px 30px', background: 'white', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                <div style={{ display: 'inline-block', padding: '16px 20px', background: 'white', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', maxWidth: '100%', boxSizing: 'border-box' }}>
                   <div style={{ fontSize: '13px', color: colors.primary, fontWeight: '600', marginBottom: '4px' }}>EMAIL US:</div>
-                  <a href="mailto:coach@keystoneendurance.com" style={{ fontSize: '15px', color: colors.primary, fontWeight: 'bold', textDecoration: 'none', letterSpacing: '0.3px' }}>
+                  <a href="mailto:coach@keystoneendurance.com" style={{ fontSize: '14px', color: colors.primary, fontWeight: 'bold', textDecoration: 'none', letterSpacing: '0.2px', wordBreak: 'break-all', display: 'block' }}>
                     COACH@KEYSTONEENDURANCE.COM
                   </a>
                 </div>
