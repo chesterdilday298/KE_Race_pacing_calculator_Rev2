@@ -6,6 +6,7 @@ export default function RacePacingCalculator() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     raceCategory: '', // 'triathlon' or 'running'
+    email: '',
     raceType: '',
     pacingApproach: '',
     athleteLevel: '', // Recreational, Intermediate, Competitive, Elite
@@ -48,6 +49,12 @@ export default function RacePacingCalculator() {
     t2Time: null, // seconds
     runPace: null // pace per mile in seconds
   });
+
+  // Email validation
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const colors = {
     primary: '#D62027',
@@ -1181,22 +1188,49 @@ ${'='.repeat(60)}
                 </div>
               </div>
 
+              {/* Email Input */}
+              <div style={{ marginTop: '30px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: colors.charcoal, marginBottom: '8px' }}>
+                  Email Address <span style={{ color: colors.primary }}>*</span>
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => updateFormData('email', e.target.value)}
+                  placeholder="your.email@example.com"
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    fontSize: '16px',
+                    border: `2px solid ${formData.email && !isValidEmail(formData.email) ? colors.primary : '#ddd'}`,
+                    borderRadius: '8px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
+                />
+                {formData.email && !isValidEmail(formData.email) && (
+                  <div style={{ fontSize: '13px', color: colors.primary, marginTop: '6px' }}>
+                    Please enter a valid email address
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={nextStep}
-                disabled={!formData.raceCategory}
+                disabled={!formData.raceCategory || !formData.email || !isValidEmail(formData.email)}
                 style={{
                   width: '100%',
-                  marginTop: '30px',
+                  marginTop: '20px',
                   padding: '16px',
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  background: formData.raceCategory ? colors.primary : '#cccccc',
+                  background: (formData.raceCategory && formData.email && isValidEmail(formData.email)) ? colors.primary : '#cccccc',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
-                  cursor: formData.raceCategory ? 'pointer' : 'not-allowed',
+                  cursor: (formData.raceCategory && formData.email && isValidEmail(formData.email)) ? 'pointer' : 'not-allowed',
                   transition: 'all 0.2s',
-                  boxShadow: formData.raceCategory ? `0 6px 20px ${colors.primary}60` : 'none',
+                  boxShadow: (formData.raceCategory && formData.email && isValidEmail(formData.email)) ? `0 6px 20px ${colors.primary}60` : 'none',
                   letterSpacing: '0.5px'
                 }}
               >
@@ -1760,11 +1794,11 @@ ${'='.repeat(60)}
                 </div>
               </div>
 
-              <div style={{ background: `${colors.primary}08`, padding: '20px', borderRadius: '12px', marginBottom: '25px' }}>
-                <div style={{ fontWeight: '700', fontSize: '16px', color: colors.charcoal, marginBottom: '8px' }}>
+              <div style={{ background: `${colors.primary}08`, padding: '15px', borderRadius: '12px', marginBottom: '25px', width: '100%', boxSizing: 'border-box' }}>
+                <div style={{ fontWeight: '700', fontSize: '15px', color: colors.charcoal, marginBottom: '8px' }}>
                   Common Goal Times:
                 </div>
-                <div style={{ fontSize: '14px', color: '#666', lineHeight: '1.8' }}>
+                <div style={{ fontSize: '13px', color: '#666', lineHeight: '1.8' }}>
                   {formData.raceType === '5K Run' && (
                     <>
                       <div>• Sub-30:00 (recreational)</div>
