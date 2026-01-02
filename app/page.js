@@ -42,6 +42,9 @@ export default function RacePacingCalculator() {
     max20minWatts: ''
   });
   const [results, setResults] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+
   const [whatIf, setWhatIf] = useState({
     swimPace: null, // pace per 100y in seconds
     t1Time: null, // seconds
@@ -139,6 +142,41 @@ export default function RacePacingCalculator() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT;
+
+const submitToFormspree = async (payload) => {
+  try {
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    // Formspree returns JSON; if it fails, we don't want to block results page forever
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      console.error('Formspree error:', data);
+      setSubmitError('We couldn’t submit your info. Your results will still load.');
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Formspree submit failed:', err);
+    setSubmitError('We couldn’t submit your info. Your results will still load.');
+    return false;
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  
   const calculateMaxHR = (age, gender, over40) => {
     if (over40) return 208 - (0.7 * age);
     return gender === 'male' ? 211 - (0.64 * age) : 206 - (0.88 * age);
@@ -601,13 +639,50 @@ export default function RacePacingCalculator() {
       setStep(3);
     } else if (step === 3 && formData.pacingApproach === 'target') {
       setStep(5);
-    } else if (step === 5 && formData.pacingApproach === 'target') {
-      calculatePacing();
-      setStep(6);
-    } else if (step === 5 && formData.pacingApproach === 'fitness') {
-      calculatePacing();
-      setStep(6);
-    } else {
+   } else if (step === 5 && (formData.pacingApproach === 'target' || formData.pacingApproach === 'fitness')) {
+  // 1) Submit lead capture (non-blocking)
+  const payload = {
+    email: formData.email,
+    raceCategory: formData.raceCategory,
+    raceType: formData.raceType,
+    pacingApproach: formData.pacingApproach,
+    athleteLevel: formData.athleteLevel,
+    currentWeight: formData.currentWeight,
+    raceWeight: formData.raceWeight,
+    age: formData.age,
+    gender: formData.gender,
+    targetTime: formData.targetTime,
+    maxHRKnown: formData.maxHRKnown,
+    maxHR: formData.maxHR,
+    restingHRKnown: formData.restingHRKnown,
+    restingHR: formData.restingHR,
+    cssKnown: formData.cssKnown,
+    css: formData.css,
+    fastest100y: formData.fastest100y,
+    ftpKnown: formData.ftpKnown,
+    ftp: formData.ftp,
+    max20minWatts: formData.max20minWatts,
+    thresholdPaceKnown: formData.thresholdPaceKnown,
+    thresholdPace: formData.thresholdPace,
+    fastest5K: formData.fastest5K,
+    thresholdPower: formData.thresholdPower,
+    // custom distances (if used)
+    customSwimDistance: formData.customSwimDistance,
+    customSwimUnit: formData.customSwimUnit,
+    customBikeDistance: formData.customBikeDistance,
+    customBikeUnit: formData.customBikeUnit,
+    customRunDistance: formData.customRunDistance,
+    customRunUnit: formData.customRunUnit,
+    submittedAt: new Date().toISOString()
+  };
+
+  // Fire-and-forget (don’t block results page)
+  submitToFormspree(payload);
+
+  // 2) Calculate + show results
+  calculatePacing();
+  setStep(6);
+} else {
       setStep(step + 1);
     }
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -2467,23 +2542,23 @@ ${'='.repeat(60)}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                           <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Cycling</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
-                            {(whatIf.bikeSpeed || results.bike.estimatedSpeed).toFixed(1)} mph
+                            {(whatIf.bikeSpeed || results.bike.estimatedSpeed || results.bike.requiredSpeed).toFixed(1)} mph
                           </span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
-                            min={results.bike.estimatedSpeed * 0.7}
-                            max={results.bike.estimatedSpeed * 1.3}
+                            min={(results.bike.estimatedSpeed || results.bike.requiredSpeed) * 0.7}
+                            max={(results.bike.estimatedSpeed || results.bike.requiredSpeed) * 1.3}
                             step="0.1"
-                            value={whatIf.bikeSpeed || results.bike.estimatedSpeed}
+                            value={whatIf.bikeSpeed || results.bike.estimatedSpeed || results.bike.requiredSpeed}
                             onChange={(e) => updateWhatIf('bikeSpeed', parseFloat(e.target.value))}
                             style={{ width: '100%' }}
                           />
                           <input
                             type="text"
                             value={(() => {
-                              const bikeSpeed = whatIf.bikeSpeed || results.bike.estimatedSpeed;
+                              const bikeSpeed = whatIf.bikeSpeed || results.bike.estimatedSpeed || results.bike.requiredSpeed;
                               const bikeDistances = {
                                 'Sprint Triathlon': 12.4,
                                 'Olympic Triathlon': 24.8,
@@ -2535,23 +2610,23 @@ ${'='.repeat(60)}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                           <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Running</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
-                            {secondsToPace(whatIf.runPace || paceToSeconds(results.run.estimatedPace))}/mi
+                            {secondsToPace(whatIf.runPace || paceToSeconds(results.run.estimatedPace || results.run.requiredPace))}/mi
                           </span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
-                            min={paceToSeconds(results.run.estimatedPace) * 0.7}
-                            max={paceToSeconds(results.run.estimatedPace) * 1.3}
+                            min={paceToSeconds(results.run.estimatedPace || results.run.requiredPace) * 0.7}
+                            max={paceToSeconds(results.run.estimatedPace || results.run.requiredPace) * 1.3}
                             step="1"
-                            value={whatIf.runPace || paceToSeconds(results.run.estimatedPace)}
+                            value={whatIf.runPace || paceToSeconds(results.run.estimatedPace || results.run.requiredPace)}
                             onChange={(e) => updateWhatIf('runPace', parseFloat(e.target.value))}
                             style={{ width: '100%' }}
                           />
                           <input
                             type="text"
                             value={(() => {
-                              const runPace = whatIf.runPace || paceToSeconds(results.run.estimatedPace);
+                              const runPace = whatIf.runPace || paceToSeconds(results.run.estimatedPace || results.run.requiredPace);
                               const runDistances = {
                                 'Sprint Triathlon': 3.1,
                                 'Olympic Triathlon': 6.2,
@@ -2606,7 +2681,7 @@ ${'='.repeat(60)}
                             <div style={{ fontSize: '10px', color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>Bike</div>
                             <div style={{ fontSize: '16px', fontWeight: '700', color: colors.charcoal }}>
                               {(() => {
-                                const bikeSpeed = whatIf.bikeSpeed || results.bike.estimatedSpeed;
+                                const bikeSpeed = whatIf.bikeSpeed || results.bike.estimatedSpeed || results.bike.requiredSpeed;
                                 const bikeDistances = {
                                   'Sprint Triathlon': 12.4,
                                   'Olympic Triathlon': 24.8,
@@ -2632,7 +2707,7 @@ ${'='.repeat(60)}
                             <div style={{ fontSize: '10px', color: '#666', marginBottom: '4px', textTransform: 'uppercase' }}>Run</div>
                             <div style={{ fontSize: '16px', fontWeight: '700', color: colors.charcoal }}>
                               {(() => {
-                                const runPace = whatIf.runPace || paceToSeconds(results.run.estimatedPace);
+                                const runPace = whatIf.runPace || paceToSeconds(results.run.estimatedPace || results.run.requiredPace);
                                 const runDistances = {
                                   'Sprint Triathlon': 3.1,
                                   'Olympic Triathlon': 6.2,
