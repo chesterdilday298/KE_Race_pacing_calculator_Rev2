@@ -587,22 +587,21 @@ export default function RacePacingCalculator() {
     setResults(result);
   };
 
-  const nextStep = () => {if (step === 1) {
-      // From race category to distance selectionsetStep(2);
+  const nextStep = () => {
+    if (step === 1) {
+      setStep(2);
     } else if (step === 2) {
-      // From distance selection to approach selectionsetStep(3);
+      setStep(3);
     } else if (step === 3 && formData.pacingApproach === 'target') {
-      
-      setStep(5); // Skip to target time input
-    } else if (step === 5 && formData.pacingApproach === 'target') {try {
-        calculatePacing();setStep(6);
-      } catch (error) {alert('Error calculating pacing: ' + error.message);
-      }
-    } else if (step === 5 && formData.pacingApproach === 'fitness') {try {
-        calculatePacing();setStep(6);
-      } catch (error) {alert('Error calculating pacing: ' + error.message);
-      }
-    } else {setStep(step + 1);
+      setStep(5);
+    } else if (step === 5 && formData.pacingApproach === 'target') {
+      calculatePacing();
+      setStep(6);
+    } else if (step === 5 && formData.pacingApproach === 'fitness') {
+      calculatePacing();
+      setStep(6);
+    } else {
+      setStep(step + 1);
     }
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   };
