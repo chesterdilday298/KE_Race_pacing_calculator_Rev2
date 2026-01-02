@@ -42,9 +42,6 @@ export default function RacePacingCalculator() {
     max20minWatts: ''
   });
   const [results, setResults] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-
   const [whatIf, setWhatIf] = useState({
     swimPace: null, // pace per 100y in seconds
     t1Time: null, // seconds
@@ -142,41 +139,6 @@ export default function RacePacingCalculator() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT;
-
-const submitToFormspree = async (payload) => {
-  try {
-    setSubmitError(null);
-    setIsSubmitting(true);
-
-    const res = await fetch(FORMSPREE_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    // Formspree returns JSON; if it fails, we don't want to block results page forever
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      console.error('Formspree error:', data);
-      setSubmitError('We couldn’t submit your info. Your results will still load.');
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error('Formspree submit failed:', err);
-    setSubmitError('We couldn’t submit your info. Your results will still load.');
-    return false;
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-  
   const calculateMaxHR = (age, gender, over40) => {
     if (over40) return 208 - (0.7 * age);
     return gender === 'male' ? 211 - (0.64 * age) : 206 - (0.88 * age);
@@ -639,57 +601,20 @@ const submitToFormspree = async (payload) => {
       setStep(3);
     } else if (step === 3 && formData.pacingApproach === 'target') {
       setStep(5);
-   } else if (step === 5 && (formData.pacingApproach === 'target' || formData.pacingApproach === 'fitness')) {
-  // 1) Submit lead capture (non-blocking)
-  const payload = {
-    email: formData.email,
-    raceCategory: formData.raceCategory,
-    raceType: formData.raceType,
-    pacingApproach: formData.pacingApproach,
-    athleteLevel: formData.athleteLevel,
-    currentWeight: formData.currentWeight,
-    raceWeight: formData.raceWeight,
-    age: formData.age,
-    gender: formData.gender,
-    targetTime: formData.targetTime,
-    maxHRKnown: formData.maxHRKnown,
-    maxHR: formData.maxHR,
-    restingHRKnown: formData.restingHRKnown,
-    restingHR: formData.restingHR,
-    cssKnown: formData.cssKnown,
-    css: formData.css,
-    fastest100y: formData.fastest100y,
-    ftpKnown: formData.ftpKnown,
-    ftp: formData.ftp,
-    max20minWatts: formData.max20minWatts,
-    thresholdPaceKnown: formData.thresholdPaceKnown,
-    thresholdPace: formData.thresholdPace,
-    fastest5K: formData.fastest5K,
-    thresholdPower: formData.thresholdPower,
-    // custom distances (if used)
-    customSwimDistance: formData.customSwimDistance,
-    customSwimUnit: formData.customSwimUnit,
-    customBikeDistance: formData.customBikeDistance,
-    customBikeUnit: formData.customBikeUnit,
-    customRunDistance: formData.customRunDistance,
-    customRunUnit: formData.customRunUnit,
-    submittedAt: new Date().toISOString()
-  };
-
-  // Fire-and-forget (don’t block results page)
-  submitToFormspree(payload);
-
-  // 2) Calculate + show results
-  calculatePacing();
-  setStep(6);
-} else {
+    } else if (step === 5 && formData.pacingApproach === 'target') {
+      calculatePacing();
+      setStep(6);
+    } else if (step === 5 && formData.pacingApproach === 'fitness') {
+      calculatePacing();
+      setStep(6);
+    } else {
       setStep(step + 1);
     }
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   };
 
   const calculateWhatIfTime = () => {
-    if (!results || raceTypes[results.raceType].type !== 'triathlon' || results.approach !== 'fitness') {
+    if (!results || raceTypes[results.raceType].type !== 'triathlon') {
       return results?.totalTime || '0:00:00';
     }
 
@@ -715,25 +640,40 @@ const submitToFormspree = async (payload) => {
       'Custom Triathlon': convertToMiles(formData.customRunDistance, formData.customRunUnit)
     };
 
-    const transitions = getTransitionTimes(results.raceType);
+    // Get default transition times
+    const defaultTransitions = getTransitionTimes(results.raceType);
+    
+    // For target time approach, use the calculated t1/t2 times if available
+    let baseT1 = defaultTransitions.t1;
+    let baseT2 = defaultTransitions.t2;
+    
+    if (results.approach === 'target') {
+      // Target time has specific t1/t2 target times calculated
+      if (results.t1 && results.t1.targetTime) {
+        baseT1 = timeToSeconds(results.t1.targetTime);
+      }
+      if (results.t2 && results.t2.targetTime) {
+        baseT2 = timeToSeconds(results.t2.targetTime);
+      }
+    }
 
     // Calculate swim time
     const swimPaceSeconds = whatIf.swimPace || paceToSeconds(results.swim.targetPace);
     const swimDistanceYards = swimDistances[results.raceType] * 1760;
     const swimTime = (swimDistanceYards / 100) * swimPaceSeconds;
 
-    // Calculate T1
-    const t1Time = whatIf.t1Time || transitions.t1;
+    // Calculate T1 (use slider value or base from results)
+    const t1Time = whatIf.t1Time || baseT1;
 
     // Calculate bike time
-    const bikeSpeed = whatIf.bikeSpeed || results.bike.estimatedSpeed;
+    const bikeSpeed = whatIf.bikeSpeed || results.bike.estimatedSpeed || results.bike.requiredSpeed;
     const bikeTime = (bikeDistances[results.raceType] / bikeSpeed) * 3600;
 
-    // Calculate T2
-    const t2Time = whatIf.t2Time || transitions.t2;
+    // Calculate T2 (use slider value or base from results)
+    const t2Time = whatIf.t2Time || baseT2;
 
     // Calculate run time
-    const runPace = whatIf.runPace || paceToSeconds(results.run.estimatedPace);
+    const runPace = whatIf.runPace || paceToSeconds(results.run.estimatedPace || results.run.requiredPace);
     const runTime = runPace * runDistances[results.raceType];
 
     const totalSeconds = swimTime + t1Time + bikeTime + t2Time + runTime;
