@@ -275,24 +275,29 @@ export default function RacePacingCalculator() {
     return strategies[raceType];
   };
 
-  const getPacingZones = (raceType) => {const zones = {
-      'Sprint Triathlon': { swimCSS: 0.97, bikePower: 0.95, bikeHR: 0.88, runHR: 0.93, runPower: 1.10, runPace: 0.97, rpe: '8-9/10' },
-      'Olympic Triathlon': { swimCSS: 0.93, bikePower: 0.92, bikeHR: 0.85, runHR: 0.89, runPower: 1.05, runPace: 0.93, rpe: '7-8/10' },
-      'Half Ironman (70.3)': { swimCSS: 0.88, bikePower: 0.77, bikeHR: 0.75, runHR: 0.83, runPower: 0.90, runPace: 0.83, rpe: '6-7/10' },
-      'Full Ironman (140.6)': { swimCSS: 0.83, bikePower: 0.70, bikeHR: 0.70, runHR: 0.76, runPower: 0.85, runPace: 0.77, rpe: '6/10' },
-      'Custom Triathlon': { swimCSS: 0.93, bikePower: 0.92, bikeHR: 0.85, runHR: 0.89, runPower: 1.05, runPace: 0.93, rpe: '7-8/10' },
-      '5K Run': { runHR: 0.96, runPower: 1.12, runPace: 1.03, rpe: '9/10' },
-      '10K Run': { runHR: 0.93, runPower: 1.07, runPace: 0.98, rpe: '8/10' },
-      'Half Marathon': { runHR: 0.89, runPower: 0.97, runPace: 0.90, rpe: '7/10' },
-      'Full Marathon': { runHR: 0.86, runPower: 0.92, runPace: 0.87, rpe: '7/10' }
-    };
-    
-    const result = zones[raceType];if (!result) {
-      // Return Olympic as fallback to prevent crashreturn zones['Olympic Triathlon'];
-    }
-    
-    return result;
+  const getPacingZones = (raceType) => {
+  const zones = {
+    'Sprint Triathlon': { swimCSS: 0.97, bikePower: 0.95, bikeHR: 0.88, runHR: 0.93, runPower: 1.10, runPace: 0.97, rpe: '8-9/10' },
+    'Olympic Triathlon': { swimCSS: 0.93, bikePower: 0.92, bikeHR: 0.85, runHR: 0.89, runPower: 1.05, runPace: 0.93, rpe: '7-8/10' },
+    'Half Ironman (70.3)': { swimCSS: 0.88, bikePower: 0.77, bikeHR: 0.75, runHR: 0.83, runPower: 0.90, runPace: 0.83, rpe: '6-7/10' },
+    'Full Ironman (140.6)': { swimCSS: 0.83, bikePower: 0.70, bikeHR: 0.70, runHR: 0.76, runPower: 0.85, runPace: 0.77, rpe: '6/10' },
+    'Custom Triathlon': { swimCSS: 0.93, bikePower: 0.92, bikeHR: 0.85, runHR: 0.89, runPower: 1.05, runPace: 0.93, rpe: '7-8/10' },
+    '5K Run': { runHR: 0.96, runPower: 1.12, runPace: 1.03, rpe: '9/10' },
+    '10K Run': { runHR: 0.93, runPower: 1.07, runPace: 0.98, rpe: '8/10' },
+    'Half Marathon': { runHR: 0.89, runPower: 0.97, runPace: 0.90, rpe: '7/10' },
+    'Full Marathon': { runHR: 0.86, runPower: 0.92, runPace: 0.87, rpe: '7/10' }
   };
+
+  const result = zones[raceType];
+
+  if (!result) {
+    // Return Olympic as fallback to prevent crash
+    return zones['Olympic Triathlon'];
+  }
+
+  return result;
+};
+
 
   const getAthleteThresholdPct = (athleteLevel) => {
     const thresholds = {
