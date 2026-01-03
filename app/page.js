@@ -1963,7 +1963,7 @@ ${'='.repeat(60)}
                 <button type="button" onClick={prevStep} style={{ flex: 1, padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'white', color: colors.charcoal, border: `2px solid ${colors.charcoal}`, borderRadius: '12px', cursor: 'pointer', letterSpacing: '0.5px' }}>
                   ← BACK
                 </button>
-                <button type="submit"}
+                <button type="submit"
                   disabled={
                     formData.maxHRKnown === null ||
                     (formData.maxHRKnown && !formData.maxHR) ||
