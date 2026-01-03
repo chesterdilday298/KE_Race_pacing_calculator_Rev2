@@ -1735,6 +1735,7 @@ ${'='.repeat(60)}
                 }}
               >
                 {/* Hidden inputs with all collected data */}
+                <input type="hidden" name="email" value={formData.email} />
                 <input type="hidden" name="raceType" value={formData.raceType} />
                 <input type="hidden" name="pacingApproach" value={formData.pacingApproach} />
                 <input type="hidden" name="targetTime" value={formData.targetTime} />
@@ -1770,9 +1771,9 @@ ${'='.repeat(60)}
               
               {/* Max HR */}
               <div style={{ marginBottom: '25px', padding: '20px', background: `${colors.primary}08`, borderRadius: '12px' }}>
-                <div style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px' }}>
+                <label htmlFor="maxHR" style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px', display: 'block' }}>
                   Max Heart Rate
-                </div>
+                </label>
                 <div style={{ marginBottom: '12px' }}>
                   <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>
                     Do you know your Max HR?
@@ -1786,7 +1787,7 @@ ${'='.repeat(60)}
                   </div>
                 </div>
                 {formData.maxHRKnown === true && (
-                  <input type="number" value={formData.maxHR} onChange={(e) => updateFormData('maxHR', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 185" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px', marginTop: '8px' }} />
+                  <input type="number" id="maxHR" name="maxHR" value={formData.maxHR} onChange={(e) => updateFormData('maxHR', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 185" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px', marginTop: '8px' }} />
                 )}
                 {formData.maxHRKnown === false && (
                   <div style={{ padding: '12px', background: 'white', borderRadius: '8px', fontSize: '14px', color: '#666', marginTop: '8px' }}>
@@ -1797,9 +1798,9 @@ ${'='.repeat(60)}
 
               {/* Resting HR */}
               <div style={{ marginBottom: '25px', padding: '20px', background: `${colors.maroon}08`, borderRadius: '12px' }}>
-                <div style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px' }}>
+                <label htmlFor="restingHR" style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px', display: 'block' }}>
                   Resting Heart Rate (for better threshold calculation)
-                </div>
+                </label>
                 <div style={{ marginBottom: '12px' }}>
                   <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>
                     Do you know your Resting HR?
@@ -1813,7 +1814,7 @@ ${'='.repeat(60)}
                   </div>
                 </div>
                 {formData.restingHRKnown === true && (
-                  <input type="number" value={formData.restingHR} onChange={(e) => updateFormData('restingHR', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 55" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px', marginTop: '8px' }} />
+                  <input type="number" id="restingHR" name="restingHR" value={formData.restingHR} onChange={(e) => updateFormData('restingHR', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 55" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px', marginTop: '8px' }} />
                 )}
               </div>
 
@@ -1822,9 +1823,9 @@ ${'='.repeat(60)}
                 <>
                   {/* Swim CSS */}
                   <div style={{ marginBottom: '25px', padding: '20px', background: `${colors.primary}08`, borderRadius: '12px', border: '2px solid #e3f2fd' }}>
-                    <div style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px' }}>
+                    <label htmlFor="css" style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px', display: 'block' }}>
                       SWIM: Critical Swim Speed (CSS)
-                    </div>
+                    </label>
                     <div style={{ marginBottom: '12px' }}>
                       <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>
                         Do you know your CSS?
@@ -1840,13 +1841,13 @@ ${'='.repeat(60)}
                     {formData.cssKnown === true && (
                       <div>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '6px' }}>CSS (MM:SS per 100 yards)</label>
-                        <input type="text" value={formData.css} onChange={(e) => updateFormData('css', e.target.value)} placeholder="e.g., 1:30" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                        <input type="text" id="css" name="css" value={formData.css} onChange={(e) => updateFormData('css', e.target.value)} placeholder="e.g., 1:30" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
                       </div>
                     )}
                     {formData.cssKnown === false && (
                       <div>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '6px' }}>What's your fastest 100-yard swim time? (MM:SS)</label>
-                        <input type="text" value={formData.fastest100y} onChange={(e) => updateFormData('fastest100y', e.target.value)} placeholder="e.g., 1:45" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                        <input type="text" id="fastest100y" name="fastest100y" value={formData.fastest100y} onChange={(e) => updateFormData('fastest100y', e.target.value)} placeholder="e.g., 1:45" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
                         <div style={{ fontSize: '12px', color: '#666', marginTop: '6px', fontStyle: 'italic' }}>
                           We'll calculate CSS as 85% of your fastest 100y time
                         </div>
@@ -1856,9 +1857,9 @@ ${'='.repeat(60)}
 
                   {/* Bike FTP */}
                   <div style={{ marginBottom: '25px', padding: '20px', background: `${colors.maroon}08`, borderRadius: '12px', border: '2px solid #fff3e0' }}>
-                    <div style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px' }}>
+                    <label htmlFor="ftp" style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px', display: 'block' }}>
                       BIKE: Functional Threshold Power (FTP)
-                    </div>
+                    </label>
                     <div style={{ marginBottom: '12px' }}>
                       <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>
                         Do you know your FTP?
@@ -1874,13 +1875,13 @@ ${'='.repeat(60)}
                     {formData.ftpKnown === true && (
                       <div>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '6px' }}>FTP (watts)</label>
-                        <input type="number" value={formData.ftp} onChange={(e) => updateFormData('ftp', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 250" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                        <input type="number" id="ftp" name="ftp" value={formData.ftp} onChange={(e) => updateFormData('ftp', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 250" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
                       </div>
                     )}
                     {formData.ftpKnown === false && (
                       <div>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '6px' }}>Maximum watts you can hold for 20 minutes</label>
-                        <input type="number" value={formData.max20minWatts} onChange={(e) => updateFormData('max20minWatts', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 270" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                        <input type="number" id="max20minWatts" name="max20minWatts" value={formData.max20minWatts} onChange={(e) => updateFormData('max20minWatts', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 270" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
                         <div style={{ fontSize: '12px', color: '#666', marginTop: '6px', fontStyle: 'italic' }}>
                           We'll calculate FTP as 85% of your 20-minute max
                         </div>
@@ -1892,9 +1893,9 @@ ${'='.repeat(60)}
 
               {/* RUN Threshold Pace (for all) */}
               <div style={{ marginBottom: '25px', padding: '20px', background: `${colors.primary}08`, borderRadius: '12px', border: '2px solid #e8f5e9' }}>
-                <div style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px' }}>
+                <label htmlFor="thresholdPace" style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '12px', display: 'block' }}>
                   RUN: Threshold Pace
-                </div>
+                </label>
                 <div style={{ marginBottom: '12px' }}>
                   <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>
                     Do you know your Threshold Pace?
@@ -1910,13 +1911,13 @@ ${'='.repeat(60)}
                 {formData.thresholdPaceKnown === true && (
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '6px' }}>Threshold Pace (MM:SS per mile)</label>
-                    <input type="text" value={formData.thresholdPace} onChange={(e) => updateFormData('thresholdPace', e.target.value)} placeholder="e.g., 8:00" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                    <input type="text" id="thresholdPace" name="thresholdPace" value={formData.thresholdPace} onChange={(e) => updateFormData('thresholdPace', e.target.value)} placeholder="e.g., 8:00" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
                   </div>
                 )}
                 {formData.thresholdPaceKnown === false && (
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '6px' }}>What's the fastest 5K you can run today? (MM:SS)</label>
-                    <input type="text" value={formData.fastest5K} onChange={(e) => updateFormData('fastest5K', e.target.value)} placeholder="e.g., 24:00" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                    <input type="text" id="fastest5K" name="fastest5K" value={formData.fastest5K} onChange={(e) => updateFormData('fastest5K', e.target.value)} placeholder="e.g., 24:00" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
                     <div style={{ fontSize: '12px', color: '#666', marginTop: '6px', fontStyle: 'italic' }}>
                       We'll calculate threshold pace (should be ~10% slower than 5K pace)
                     </div>
@@ -1929,7 +1930,7 @@ ${'='.repeat(60)}
                 <div style={{ fontWeight: '700', fontSize: '17px', color: colors.charcoal, marginBottom: '8px' }}>
                   RUN: Threshold Power (Optional - Stryd users)
                 </div>
-                <input type="number" value={formData.thresholdPower} onChange={(e) => updateFormData('thresholdPower', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 285 (leave blank if no Stryd)" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
+                <input type="number" id="thresholdPower" name="thresholdPower" value={formData.thresholdPower} onChange={(e) => updateFormData('thresholdPower', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 285 (leave blank if no Stryd)" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
               </div>
 
               <form
@@ -1948,6 +1949,7 @@ ${'='.repeat(60)}
                 }}
               >
                 {/* Hidden inputs with all collected data */}
+                <input type="hidden" name="email" value={formData.email} />
                 <input type="hidden" name="raceType" value={formData.raceType} />
                 <input type="hidden" name="pacingApproach" value={formData.pacingApproach} />
                 <input type="hidden" name="age" value={formData.age} />
@@ -2304,7 +2306,7 @@ ${'='.repeat(60)}
                       {/* Swimming */}
                       <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                          <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Swimming</label>
+                          <label htmlFor="swimPaceSlider" style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Swimming</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
                             {secondsToPace(whatIf.swimPace || paceToSeconds(results.swim.targetPace))}/100y
                           </span>
@@ -2312,6 +2314,8 @@ ${'='.repeat(60)}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
+                            id="swimPaceSlider"
+                            name="swimPaceSlider"
                             min={paceToSeconds(results.swim.targetPace) * 0.7}
                             max={paceToSeconds(results.swim.targetPace) * 1.3}
                             step="1"
@@ -2343,7 +2347,7 @@ ${'='.repeat(60)}
                       {/* T1 */}
                       <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                          <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>T1 (Swim-to-Bike)</label>
+                          <label htmlFor="t1TimeSlider" style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>T1 (Swim-to-Bike)</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
                             {secondsToTime(whatIf.t1Time || getTransitionTimes(results.raceType).t1)}
                           </span>
@@ -2351,6 +2355,8 @@ ${'='.repeat(60)}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
+                            id="t1TimeSlider"
+                            name="t1TimeSlider"
                             min="30"
                             max="600"
                             step="10"
@@ -2373,7 +2379,7 @@ ${'='.repeat(60)}
                       {/* Cycling */}
                       <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                          <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Cycling</label>
+                          <label htmlFor="bikeSpeedSlider" style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Cycling</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
                             {(whatIf.bikeSpeed || results.bike.estimatedSpeed || results.bike.requiredSpeed).toFixed(1)} mph
                           </span>
@@ -2381,6 +2387,8 @@ ${'='.repeat(60)}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
+                            id="bikeSpeedSlider"
+                            name="bikeSpeedSlider"
                             min={(results.bike.estimatedSpeed || results.bike.requiredSpeed) * 0.7}
                             max={(results.bike.estimatedSpeed || results.bike.requiredSpeed) * 1.3}
                             step="0.1"
@@ -2411,7 +2419,7 @@ ${'='.repeat(60)}
                       {/* T2 */}
                       <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                          <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>T2 (Bike-to-Run)</label>
+                          <label htmlFor="t2TimeSlider" style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>T2 (Bike-to-Run)</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
                             {secondsToTime(whatIf.t2Time || getTransitionTimes(results.raceType).t2)}
                           </span>
@@ -2419,6 +2427,8 @@ ${'='.repeat(60)}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
+                            id="t2TimeSlider"
+                            name="t2TimeSlider"
                             min="30"
                             max="600"
                             step="10"
@@ -2441,7 +2451,7 @@ ${'='.repeat(60)}
                       {/* Running */}
                       <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                          <label style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Running</label>
+                          <label htmlFor="runPaceSlider" style={{ fontSize: '14px', fontWeight: '600', color: colors.charcoal }}>Running</label>
                           <span style={{ fontSize: '16px', fontWeight: '700', color: colors.primary }}>
                             {secondsToPace(whatIf.runPace || paceToSeconds(results.run.estimatedPace || results.run.requiredPace))}/mi
                           </span>
@@ -2449,6 +2459,8 @@ ${'='.repeat(60)}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
                           <input
                             type="range"
+                            id="runPaceSlider"
+                            name="runPaceSlider"
                             min={paceToSeconds(results.run.estimatedPace || results.run.requiredPace) * 0.7}
                             max={paceToSeconds(results.run.estimatedPace || results.run.requiredPace) * 1.3}
                             step="1"
