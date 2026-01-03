@@ -1,5 +1,7 @@
 'use client';
 
+const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT || 'https://formspree.io/f/YOUR_FORM_ID';
+
 import { useState, useEffect } from 'react';
 
 export default function RacePacingCalculator() {
@@ -1043,14 +1045,17 @@ ${'='.repeat(60)}
 
               {/* Email Input */}
               <div style={{ marginTop: '30px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: colors.charcoal, marginBottom: '8px' }}>
+                <label htmlFor="email" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: colors.charcoal, marginBottom: '8px' }}>
                   Email Address <span style={{ color: colors.primary }}>*</span>
                 </label>
                 <input
                   type="email"
+                  id="email"
+                  name="email"
                   value={formData.email}
                   onChange={(e) => updateFormData('email', e.target.value)}
                   placeholder="your.email@example.com"
+                  autoComplete="email"
                   style={{
                     width: '100%',
                     padding: '14px',
@@ -1714,19 +1719,43 @@ ${'='.repeat(60)}
                 </div>
               </div>
               
-              <div style={{ display: 'flex', gap: '12px', marginTop: '25px' }}>
-                <button onClick={prevStep} style={{ flex: 1, padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'white', color: colors.charcoal, border: `2px solid ${colors.charcoal}`, borderRadius: '12px', cursor: 'pointer', letterSpacing: '0.5px' }}>
-                  ← BACK
-                </button>
-                <button
-                  onClick={() => {nextStep();
-                  }}
-                  disabled={!formData.targetTime}
-                  style={{ flex: 2, padding: '16px', fontSize: '18px', fontWeight: 'bold', background: formData.targetTime ? colors.primary : '#cccccc', color: 'white', border: 'none', borderRadius: '12px', cursor: formData.targetTime ? 'pointer' : 'not-allowed', boxShadow: formData.targetTime ? `0 6px 20px ${colors.primary}60` : 'none', letterSpacing: '0.5px' }}
-                >
-                  GET MY STRATEGY →
-                </button>
-              </div>
+              <form
+                action={FORMSPREE_ENDPOINT}
+                method="POST"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  // Submit to Formspree
+                  fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    body: new FormData(e.target),
+                    headers: { 'Accept': 'application/json' }
+                  });
+                  // Then show results
+                  nextStep();
+                }}
+              >
+                {/* Hidden inputs with all collected data */}
+                <input type="hidden" name="raceType" value={formData.raceType} />
+                <input type="hidden" name="pacingApproach" value={formData.pacingApproach} />
+                <input type="hidden" name="targetTime" value={formData.targetTime} />
+                <input type="hidden" name="age" value={formData.age} />
+                <input type="hidden" name="gender" value={formData.gender} />
+                <input type="hidden" name="calculatorType" value="Race Pacing Calculator" />
+                <input type="hidden" name="_subject" value="New Race Pacing Strategy Request" />
+                
+                <div style={{ display: 'flex', gap: '12px', marginTop: '25px' }}>
+                  <button type="button" onClick={prevStep} style={{ flex: 1, padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'white', color: colors.charcoal, border: `2px solid ${colors.charcoal}`, borderRadius: '12px', cursor: 'pointer', letterSpacing: '0.5px' }}>
+                    ← BACK
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!formData.targetTime}
+                    style={{ flex: 2, padding: '16px', fontSize: '18px', fontWeight: 'bold', background: formData.targetTime ? colors.primary : '#cccccc', color: 'white', border: 'none', borderRadius: '12px', cursor: formData.targetTime ? 'pointer' : 'not-allowed', boxShadow: formData.targetTime ? `0 6px 20px ${colors.primary}60` : 'none', letterSpacing: '0.5px' }}
+                  >
+                    GET MY STRATEGY →
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
@@ -1903,13 +1932,38 @@ ${'='.repeat(60)}
                 <input type="number" value={formData.thresholdPower} onChange={(e) => updateFormData('thresholdPower', e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g., 285 (leave blank if no Stryd)" style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #ddd', borderRadius: '8px' }} />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '25px' }}>
-                <button onClick={prevStep} style={{ flex: 1, padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'white', color: colors.charcoal, border: `2px solid ${colors.charcoal}`, borderRadius: '12px', cursor: 'pointer', letterSpacing: '0.5px' }}>
+              <form
+                action={FORMSPREE_ENDPOINT}
+                method="POST"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  // Submit to Formspree
+                  fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    body: new FormData(e.target),
+                    headers: { 'Accept': 'application/json' }
+                  });
+                  // Then show results
+                  nextStep();
+                }}
+              >
+                {/* Hidden inputs with all collected data */}
+                <input type="hidden" name="raceType" value={formData.raceType} />
+                <input type="hidden" name="pacingApproach" value={formData.pacingApproach} />
+                <input type="hidden" name="age" value={formData.age} />
+                <input type="hidden" name="gender" value={formData.gender} />
+                <input type="hidden" name="maxHR" value={formData.maxHR} />
+                <input type="hidden" name="restingHR" value={formData.restingHR} />
+                <input type="hidden" name="css" value={formData.css} />
+                <input type="hidden" name="ftp" value={formData.ftp} />
+                <input type="hidden" name="thresholdPace" value={formData.thresholdPace} />
+                <input type="hidden" name="calculatorType" value="Race Pacing Calculator" />
+                <input type="hidden" name="_subject" value="New Race Pacing Strategy Request" />
+                              <div style={{ display: 'flex', gap: '12px', marginTop: '25px' }}>
+                <button type="button" onClick={prevStep} style={{ flex: 1, padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'white', color: colors.charcoal, border: `2px solid ${colors.charcoal}`, borderRadius: '12px', cursor: 'pointer', letterSpacing: '0.5px' }}>
                   ← BACK
                 </button>
-                <button
-                  onClick={() => {nextStep();
-                  }}
+                <button type="submit"}
                   disabled={
                     formData.maxHRKnown === null ||
                     (formData.maxHRKnown && !formData.maxHR) ||
@@ -1988,6 +2042,7 @@ ${'='.repeat(60)}
                   GET MY STRATEGY →
                 </button>
               </div>
+              </form>
             </div>
           </div>
         )}
