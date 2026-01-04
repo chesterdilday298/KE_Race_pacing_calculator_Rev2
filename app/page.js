@@ -94,6 +94,8 @@ export default function RacePacingCalculator() {
     '10K Run': { distance: '6.2 miles (10K)', type: 'run' },
     'Half Marathon': { distance: '13.1 Miles', type: 'run' },
     'Full Marathon': { distance: '26.2 Miles', type: 'run' },
+    '50 Mile Ultra': { distance: '50 Miles', type: 'run' },
+    '100 Mile Ultra': { distance: '100 Miles', type: 'run' },
     'Custom Run': {
       distance: 'Custom Distance',
       type: 'run'
@@ -216,65 +218,956 @@ export default function RacePacingCalculator() {
     return Math.max(0, speedMph); // Ensure non-negative
   };
 
-  const getRaceStrategy = (raceType) => {
+  const getRaceStrategy = (raceType, athleteLevel = 'Intermediate') => {
     const strategies = {
       'Sprint Triathlon': {
-        mistake: 'Racing like it\'s a 45-60 minute suffer-fest from the gun.',
-        swim: 'Calm and controlled. You should exit slightly under redline, not gasping.',
-        bike: 'Hard but smooth. Avoid surging out of turns or chasing faster riders.',
-        run: 'First half = control on target. Second half = let it all out and race.',
-        mindset: 'Sprint rewards fitness, but still punishes stupidity. You can\'t win it on the bike if you destroy the run.'
+        'Recreational': {
+          mistake: 'Bike Fatigue: Entering the run with depleted quads due to poor gearing or over-exertion on the bike.',
+          strategy: 'Build Pace Gradually: Start the run 15-20 seconds per mile slower than goal pace to let your legs adapt to the new movement.',
+          mindset: 'Fast not Frantic: Move with speed and purpose, but keep your breathing and movements under control.',
+          swim: {
+            mistake: 'Panic and Over-effort: Start-line anxiety often triggers hyperventilation and an unsustainable HR spike. Stay calm.',
+            strategy: 'Easy Aerobic Swim, Wide Start: Position yourself on the outside of the pack for clear water. Focus on a relaxed, rhythmic stroke.',
+            mindset: 'Calm Beats Fast: Staying relaxed in the water saves more energy and time than a frantic, high-effort stroke.',
+            nutrition_before: 'Normal Meal: Eat a familiar, carb-rich meal (oatmeal, toast, or rice) 2–3 hours before. Avoid high fiber and fat.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Chaos: Transitions are high-stress environments. Moving without a plan leads to forgotten gear and lost time.',
+            strategy: 'Deliberate Movements: Move through transition with purpose, not haste. Visualize each step of the process beforehand.',
+            mindset: 'Smooth is Fast: Fluid, deliberate movements in transition always beat panicked, \'fast\' movements.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Snack: A quick gel or chew taken during transition or early in the segment.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Overbiking: Pushing too hard on the bike feels fast now but \'sabotages\' your legs for the run later.',
+            strategy: 'Comfortable-hard, Spin Cadence: Maintain a cadence of 85-95 RPM to preserve your leg muscles for the run. Effort should feel sustainable.',
+            mindset: 'Save the Run: You can\'t win the race on the bike, but you can certainly lose it by overbiking.',
+            nutrition_before: '',
+            nutrition_during: 'Water Only: Focus on hydration to manage thirst without stomach sloshing.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'HR Spike: Transitioning from horizontal (swim) to vertical (run/bike) causes a sudden heart rate jump. Breathe through it.',
+            strategy: 'Breathe before Running: Take 5-10 deep, calming breaths in T2 to reset your system before heading out on the run.',
+            mindset: 'Reset: Use transition to clear your mind. Forget the previous segment and focus entirely on the next task.',
+            nutrition_before: '',
+            nutrition_during: 'Optional Snack: Take a small carb snack if you feel your energy dipping.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Bike Fatigue: Entering the run with depleted quads due to poor gearing or over-exertion on the bike.',
+            strategy: 'Build Pace Gradually: Start the run 15-20 seconds per mile slower than goal pace to let your legs adapt to the new movement.',
+            mindset: 'Fast not Frantic: Move with speed and purpose, but keep your breathing and movements under control.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Recovery: 20g protein + 60g carbs within 45 mins. Liquid recovery drinks are ideal.'
+          },
+        },
+        'Intermediate': {
+          mistake: 'Overstride: Trying to run too fast too early on \'jelly legs\' leads to poor mechanics and early fatigue.',
+          strategy: 'Hold Pace then Kick: Maintain a steady, strong effort for the first 80% of the run, then \'empty the tank\' for the finish.',
+          mindset: 'Race the Run: The triathlon doesn\'t really start until the run. This is where the results are decided.',
+          swim: {
+            mistake: 'Poor Positioning: Getting stuck in the middle of a pack in the swim leads to physical contact and disrupted rhythm.',
+            strategy: 'Controlled Hard Effort: Push the pace but keep your breathing under control. You should be working, but not gasping.',
+            mindset: 'Clean Water Matters: Finding a line away from the pack reduces drag and mental stress in the swim.',
+            nutrition_before: 'Light Carbs: Small, easily digestible carb snack (banana or applesauce) 60-90 mins before. Keep it light.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Inefficiency: Wasted movements in transition or poor stroke mechanics in the water.',
+            strategy: 'Practice Sequence: Every movement in transition should be a practiced habit. No thinking, just execution.',
+            mindset: 'Free Speed: Aerodynamics and efficient transitions provide \'free\' time that doesn\'t cost physiological energy.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Power Spikes: Hard accelerations out of corners or on hills that burn through your limited glycogen stores.',
+            strategy: 'Upper Z3 Controlled: Ride at the top of your Tempo zone. It should feel \'comfortably tough\' but sustainable.',
+            mindset: 'No Wasted Watts: Every bit of power you put into the pedals should move you forward. Stay aero and steady.',
+            nutrition_before: '',
+            nutrition_during: 'Rinse Mouth: Swish sports drink and spit to trick the brain into producing more power.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Shoes On, Settle Cadence: Get into your shoes quickly, then immediately focus on finding your target cadence of 90+ RPM.',
+            mindset: 'Quick Feet: Focus on a light, fast turnover to minimize the jarring impact on your legs.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Overstride: Trying to run too fast too early on \'jelly legs\' leads to poor mechanics and early fatigue.',
+            strategy: 'Hold Pace then Kick: Maintain a steady, strong effort for the first 80% of the run, then \'empty the tank\' for the finish.',
+            mindset: 'Race the Run: The triathlon doesn\'t really start until the run. This is where the results are decided.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Snack: Small carb + protein snack (chocolate milk or bar) within 30 mins.'
+          },
+        },
+        'Competitive': {
+          mistake: 'HR Ceiling: Reaching a point where you cannot increase your effort because your heart rate is already at its limit.',
+          strategy: 'Progressive Aggression: Start strong and gradually increase the intensity as you get closer to the finish line.',
+          mindset: 'Hold Form: Focus on technique when fatigue sets in. Efficiency is more important than raw effort now.',
+          swim: {
+            mistake: 'Oxygen Debt: Starting the swim or bike too hard, creating a deficit that forces you to slow down later.',
+            strategy: 'Hard but Controlled: A high-intensity effort that requires focus to maintain, but isn\'t an all-out sprint yet.',
+            mindset: 'Get Position Early: Fight for your spot in the swim or bike pack in the first few minutes so you can settle in.',
+            nutrition_before: 'Carb Snack: Simple sugars (gel or chews) 15-30 mins before the start to top off glycogen.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Seconds Lost: Small errors like struggling with a wetsuit or shoes that add up to significant time loss.',
+            strategy: 'Highly Rehearsed: Your transition should be so well-practiced that you could do it with your eyes closed.',
+            mindset: 'Attack Transitions: View T1 and T2 as competitive segments. You can pass people here without breaking a sweat.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Over-gear Risk: Using a gear that is too heavy, placing excessive load on the muscles rather than the CV system.',
+            strategy: 'Near Threshold, Smooth: Ride just below your \'red line\'. Focus on being aero and maintaining a steady power output.',
+            mindset: 'Pressure without Panic: Work hard, but never let your heart rate or mind go \'into the red\'.',
+            nutrition_before: '',
+            nutrition_during: 'Rinse Mouth: Swish sports drink and spit to trick the brain into producing more power.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Fast Change, Settle Stride: Quick gear swap, then immediately focus on run cadence rather than speed to settle the legs.',
+            mindset: 'Run Tall: Maintain good posture even when tired. It improves breathing and mechanical efficiency.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'HR Ceiling: Reaching a point where you cannot increase your effort because your heart rate is already at its limit.',
+            strategy: 'Progressive Aggression: Start strong and gradually increase the intensity as you get closer to the finish line.',
+            mindset: 'Hold Form: Focus on technique when fatigue sets in. Efficiency is more important than raw effort now.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Immediate: 50-75g of high-GI carbs post-finish to replenish depleted glycogen.'
+          },
+        },
+        'Elite': {
+          mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+          strategy: 'Match and Counter: If a competitor surges, match the effort, then look for your own opportunity to take the lead.',
+          mindset: 'Race People: Use the athletes around you as \'tow trucks\' or targets. Competition is a powerful motivator.',
+          swim: {
+            mistake: 'Oxygen Debt: Starting the swim or bike too hard, creating a deficit that forces you to slow down later.',
+            strategy: 'Max Sustainable Start: The fastest pace you can hold without creating an oxygen debt you can\'t pay back.',
+            mindset: 'Win Clean Water: Aggressively seek a clear swimming line early to avoid the \'washing machine\' effect of the pack.',
+            nutrition_before: 'Carb Primed: High-GI carb snack 15 mins pre-race to ensure blood glucose is peaked for high intensity.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Seconds Lost: Small errors like struggling with a wetsuit or shoes that add up to significant time loss.',
+            strategy: 'Explosive but Clean: High-intensity movements that remain technically perfect to avoid errors.',
+            mindset: 'Every Second Counts: Respect the clock. A second saved in transition is as good as a second saved on the road.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Tactical Watts: Using power at the wrong times, such as \'hammering\' into a headwind instead of staying aero.',
+            strategy: 'Surge Selectively: Use your power bursts only when they provide a clear tactical advantage (e.g., passing or hills).',
+            mindset: 'Race the Course: Focus on the terrain and your own numbers, not the other athletes.',
+            nutrition_before: '',
+            nutrition_during: 'Rinse Mouth: Swish sports drink and spit to trick the brain into producing more power.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Execution Speed: Moving too fast in transition resulting in errors, or too slow resulting in time loss.',
+            strategy: 'No Hesitation: React instantly to transition cues or race developments. Doubt is slower than error.',
+            mindset: 'Transition Violence: Move through T1 and T2 with extreme aggression and focus. Leave nothing on the table.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+            strategy: 'Match and Counter: If a competitor surges, match the effort, then look for your own opportunity to take the lead.',
+            mindset: 'Race People: Use the athletes around you as \'tow trucks\' or targets. Competition is a powerful motivator.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Rapid Refuel: 1.2g/kg of carbs + 25g protein immediately. Continue for 4 hours.'
+          },
+        },
       },
+
       'Olympic Triathlon': {
-        mistake: 'Treating it like a long sprint.',
-        swim: 'First 400m controlled breathing. Build effort gradually, don\'t surge.',
-        bike: 'Settle the first 10 minutes, then apply steady pressure to the wattage target. Increase cadence the final 5-10 minutes.',
-        run: 'First 2K easy. Lock in rhythm. Final 2K empty the tank.',
-        mindset: 'Olympic races are decided by bike discipline and run patience, not bravery.'
+        'Recreational': {
+          mistake: 'Early Fade: Starting the run at a pace your legs aren\'t yet ready to support after the bike leg.',
+          strategy: 'Conservative First Mile: Deliberately run the first mile slower than goal pace to ensure you have legs for the finish.',
+          mindset: 'Finish Proud: Empty the tank in the final mile. Leave the course knowing you gave everything.',
+          swim: {
+            mistake: 'Early Panic: Fear of the swim distance or mass start leading to an inefficient, panicked stroke.',
+            strategy: 'Smooth Aerobic: A relaxed, sustainable pace where you focus on technique and efficient breathing.',
+            mindset: 'Relax the Exhale: Focus on breathing out. It lowers your heart rate and keeps your body from tensing up.',
+            nutrition_before: 'Normal Meal: Eat a familiar, carb-rich meal (oatmeal, toast, or rice) 2–3 hours before. Avoid high fiber and fat.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Cognitive Overload: Having too much to remember in T1 or T2, leading to missed steps (like leaving your helmet on).',
+            strategy: 'Simple Checklist: Have a 3-point mental list for transition (e.g., Helmet, Shoes, Glasses) to avoid errors.',
+            mindset: 'Slow is Smooth: Moving calmly in transition prevents errors. And smooth is eventually fast.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Snack: A quick gel or chew taken during transition or early in the segment.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Overbiking: Pushing too hard on the bike feels fast now but \'sabotages\' your legs for the run later.',
+            strategy: 'Upper Z2 Discipline: Stay at the top of your \'Endurance\' zone. Don\'t let ego push you into Tempo (Z3) early.',
+            mindset: 'Bike Sets Run: Your performance on the run is a direct reflection of how well you managed your bike leg.',
+            nutrition_before: '',
+            nutrition_during: 'Fueling: Target 45–60g of carbs per hour using a mix of liquids and gels.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Leg Shock: The jarring sensation of the first mile of the run when blood hasn\'t fully redistributed to the running muscles.',
+            strategy: 'Jog Out Controlled: Start the run with a short, easy stride to let the blood flow adjust from the bike.',
+            mindset: 'Reset System: Use the first few minutes of the run to let your heart rate and stomach settle.',
+            nutrition_before: '',
+            nutrition_during: 'Optional Snack: Take a small carb snack if you feel your energy dipping.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Early Fade: Starting the run at a pace your legs aren\'t yet ready to support after the bike leg.',
+            strategy: 'Conservative First Mile: Deliberately run the first mile slower than goal pace to ensure you have legs for the finish.',
+            mindset: 'Finish Proud: Empty the tank in the final mile. Leave the course knowing you gave everything.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Recovery: 20g protein + 60g carbs within 45 mins. Liquid recovery drinks are ideal.'
+          },
+        },
+        'Intermediate': {
+          mistake: 'Overpacing: Trying to hold a pace that is theoretically possible but isn\'t sustainable for the day\'s conditions.',
+          strategy: 'Controlled Speed: Moving fast while maintaining total control over your breathing and form.',
+          mindset: 'Run Patient: Don\'t chase the PR in the first mile. Let the pace come to you as your legs settle.',
+          swim: {
+            mistake: 'Poor Positioning: Getting stuck in the middle of a pack in the swim leads to physical contact and disrupted rhythm.',
+            strategy: 'Smooth Strong Tempo: A solid, rhythmic effort that feels powerful but manageable.',
+            mindset: 'Long Strokes: Focus on distance per stroke in the swim. It’s more efficient than a fast, short stroke.',
+            nutrition_before: 'Light Carbs: Small, easily digestible carb snack (banana or applesauce) 60-90 mins before. Keep it light.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Rushed Setup: Failing to organize gear in transition, leading to fumbling when every second counts.',
+            strategy: 'Practice Sequence: Every movement in transition should be a practiced habit. No thinking, just execution.',
+            mindset: 'Control Wins: The athlete who manages their energy, emotions, and mechanics the best will win.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Power Creep: Allowing your wattage to slowly drift upward during the ride as you feel \'good\', ending in a late-race crash.',
+            strategy: 'Low Z2 Discipline: Truly easy, aerobic effort. This is about patience and saving matches for the marathon.',
+            mindset: 'Run the Plan: Ignore what others are doing. Stick to your prescribed heart rate and pace zones.',
+            nutrition_before: '',
+            nutrition_during: 'Fueling: Target 60–75g of carbs per hour. Be consistent; don\'t wait for hunger.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Shoes On, Settle Cadence: Get into your shoes quickly, then immediately focus on finding your target cadence of 90+ RPM.',
+            mindset: 'Quick Feet: Focus on a light, fast turnover to minimize the jarring impact on your legs.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Overpacing: Trying to hold a pace that is theoretically possible but isn\'t sustainable for the day\'s conditions.',
+            strategy: 'Controlled Speed: Moving fast while maintaining total control over your breathing and form.',
+            mindset: 'Run Patient: Don\'t chase the PR in the first mile. Let the pace come to you as your legs settle.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Recovery Meal: Balanced meal (protein/complex carbs) within 2 hours. Focus on hydration.'
+          },
+        },
+        'Competitive': {
+          mistake: 'Mid-run Fade: A mental and physical slump around the midway point of the run leg.',
+          strategy: 'Start Slightly Conservative: Give yourself a 5-minute \'buffer\' at the start to find your rhythm before pushing.',
+          mindset: 'Flip the Switch: Mental transition. The bike is over; you are now a runner. Adopt that identity immediately.',
+          swim: {
+            mistake: 'Pack Positioning: Getting dropped from a legal draft or stuck behind slower athletes in the swim/bike.',
+            strategy: 'Hard but Controlled: A high-intensity effort that requires focus to maintain, but isn\'t an all-out sprint yet.',
+            mindset: 'Get Position Early: Fight for your spot in the swim or bike pack in the first few minutes so you can settle in.',
+            nutrition_before: 'Carb Snack: Simple sugars (gel or chews) 15-30 mins before the start to top off glycogen.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Lost Seconds: Efficiency errors that don\'t feel big but separate the podium from the rest of the pack.',
+            strategy: 'Highly Rehearsed: Your transition should be so well-practiced that you could do it with your eyes closed.',
+            mindset: 'Attack Transitions: View T1 and T2 as competitive segments. You can pass people here without breaking a sweat.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Run Sabotage: Pushing 5-10 watts too high on the bike, which costs you 5-10 minutes on the run.',
+            strategy: 'Low Z3 Steady Watts: Maintain consistent power in your lower \'Tempo\' zone, avoiding spikes on hills.',
+            mindset: 'Stay Legal: Don\'t risk a drafting penalty. The 5 minutes in the penalty tent are never worth the \'free\' speed.',
+            nutrition_before: '',
+            nutrition_during: 'High Carb: Target 75–90g of carbs per hour. Train your gut in advance for this volume.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Breathe and Go: A quick mental reset and a deep breath, then immediate execution.',
+            mindset: 'Protect the Run: Everything you do on the bike should be filtered through the question: \'How will this affect my run?\'',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Mid-run Fade: A mental and physical slump around the midway point of the run leg.',
+            strategy: 'Start Slightly Conservative: Give yourself a 5-minute \'buffer\' at the start to find your rhythm before pushing.',
+            mindset: 'Flip the Switch: Mental transition. The bike is over; you are now a runner. Adopt that identity immediately.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Immediate: 50-75g of high-GI carbs post-finish to replenish depleted glycogen.'
+          },
+        },
+        'Elite': {
+          mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+          strategy: 'Even Effort, Surge Late: Hold a steady pace for the majority of the segment, then attack in the final quarter.',
+          mindset: 'Race the Last 5K: The finish is close. This is the time to start \'spending\' whatever energy you have left.',
+          swim: {
+            mistake: 'Pack Positioning: Getting dropped from a legal draft or stuck behind slower athletes in the swim/bike.',
+            strategy: 'Hard but Relaxed: Maximum effort while keeping the face, neck, and shoulders completely loose.',
+            mindset: 'Win Clean Water: Aggressively seek a clear swimming line early to avoid the \'washing machine\' effect of the pack.',
+            nutrition_before: 'Carb Primed: High-GI carb snack 15 mins pre-race to ensure blood glucose is peaked for high intensity.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Execution Errors: Mechanical mistakes, missed turns, or forgotten equipment due to high-intensity stress.',
+            strategy: 'Rehearsed Efficiency: Using muscle memory to move through segments with zero wasted motion.',
+            mindset: 'Every Second Counts: Respect the clock. A second saved in transition is as good as a second saved on the road.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Tactical Dynamics: Misreading the race flow or the moves of competitors, resulting in lost time.',
+            strategy: 'Upper Z3 Precise: Holding a specific, high-intensity power target with minimal deviation.',
+            mindset: 'Race People: Use the athletes around you as \'tow trucks\' or targets. Competition is a powerful motivator.',
+            nutrition_before: '',
+            nutrition_during: 'Elite Fueling: 90g+ of carbs per hour via hydrogel or liquid fuel. Requires high GI training.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Execution Speed: Moving too fast in transition resulting in errors, or too slow resulting in time loss.',
+            strategy: 'Clean and Fast: Prioritize a clean, error-free transition over a \'fast\' one; clean ends up being faster.',
+            mindset: 'Transition Violence: Move through T1 and T2 with extreme aggression and focus. Leave nothing on the table.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+            strategy: 'Even Effort, Surge Late: Hold a steady pace for the majority of the segment, then attack in the final quarter.',
+            mindset: 'Race the Last 5K: The finish is close. This is the time to start \'spending\' whatever energy you have left.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Rapid Refuel: 1.2g/kg of carbs + 25g protein immediately. Continue for 4 hours.'
+          },
+        },
       },
+
       'Half Ironman (70.3)': {
-        mistake: 'Riding "just a little too hard" because it feels easy early.',
-        swim: 'Very controlled. Find breath rhythm and feet early if possible.',
-        bike: 'Conservative first 20-30 minutes. Steady middle. Aim for a negative split. Increase cadence the final 5-10 minutes. Remember your fueling plan!',
-        run: 'First 3-4 miles easy. Build to race pace by mile 6.',
-        mindset: 'If the bike feels impressive, the run will often be disappointing.'
+        'Recreational': {
+          mistake: 'Early Fade: Starting the run at a pace your legs aren\'t yet ready to support after the bike leg.',
+          strategy: 'Build Pace Gradually: Start the run 15-20 seconds per mile slower than goal pace to let your legs adapt to the new movement.',
+          mindset: 'Finish strong, not shocked: If you cross the line and immediately feel like you could have done more, you paced it perfectly. If you are gasping at mile 1, the race is already over.',
+          swim: {
+            mistake: 'Early Panic: Fear of the swim distance or mass start leading to an inefficient, panicked stroke.',
+            strategy: 'Position-first Swim: Prioritize finding clear water and a good line over pulling as hard as possible.',
+            mindset: 'Own the Line: Be assertive in the water and on the bike. Take the most efficient path available to you.',
+            nutrition_before: 'Carb Meal: Balanced meal with a heavy emphasis on complex carbs 3 hours prior. Hydrate well.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Chaos: Transitions are high-stress environments. Moving without a plan leads to forgotten gear and lost time.',
+            strategy: 'Deliberate Movements: Move through transition with purpose, not haste. Visualize each step of the process beforehand.',
+            mindset: 'Smooth is Fast: Fluid, deliberate movements in transition always beat panicked, \'fast\' movements.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Snack: A quick gel or chew taken during transition or early in the segment.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Overbiking: Pushing too hard on the bike feels fast now but \'sabotages\' your legs for the run later.',
+            strategy: 'Upper Z2 Discipline: Stay at the top of your \'Endurance\' zone. Don\'t let ego push you into Tempo (Z3) early.',
+            mindset: 'Save the Run: You can\'t win the race on the bike, but you can certainly lose it by overbiking.',
+            nutrition_before: '',
+            nutrition_during: 'Fueling: Aim for a steady intake of 60g of carbs every hour.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Leg Shock: The jarring sensation of the first mile of the run when blood hasn\'t fully redistributed to the running muscles.',
+            strategy: 'Breathe before Running: Take 5-10 deep, calming breaths in T2 to reset your system before heading out on the run.',
+            mindset: 'Zero Waste: No unnecessary movements, no unnecessary power spikes, no unnecessary time in transition.',
+            nutrition_before: '',
+            nutrition_during: 'Optional Snack: Take a small carb snack if you feel your energy dipping.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Early Fade: Starting the run at a pace your legs aren\'t yet ready to support after the bike leg.',
+            strategy: 'Build Pace Gradually: Start the run 15-20 seconds per mile slower than goal pace to let your legs adapt to the new movement.',
+            mindset: 'Finish strong, not shocked: If you cross the line and immediately feel like you could have done more, you paced it perfectly. If you are gasping at mile 1, the race is already over.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Recovery: 20g protein + 60g carbs within 45 mins. Liquid recovery drinks are ideal.'
+          },
+        },
+        'Intermediate': {
+          mistake: 'Mid-run Fade: A mental and physical slump around the midway point of the run leg.',
+          strategy: 'Hold Pace then Kick: Maintain a steady, strong effort for the first 80% of the run, then \'empty the tank\' for the finish.',
+          mindset: 'Race the Run: The triathlon doesn\'t really start until the run. This is where the results are decided.',
+          swim: {
+            mistake: 'Marginal Gains: The accumulation of small efficiencies that lead to a faster overall time.',
+            strategy: 'Smooth Strong Tempo: A solid, rhythmic effort that feels powerful but manageable.',
+            mindset: 'Clean Water Matters: Finding a line away from the pack reduces drag and mental stress in the swim.',
+            nutrition_before: 'Carb Load: Increase carb intake 24 hours prior. Final pre-race meal should be 80% carbs.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Marginal Losses: Small, cumulative errors in transition and execution that hurt the overall finish time.',
+            strategy: 'Practice Sequence: Every movement in transition should be a practiced habit. No thinking, just execution.',
+            mindset: 'Control Chaos: Use your breath and your plan to stay centered when the race gets hectic.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Tactical Wattage: Failing to apply power effectively on terrain changes or into wind shifts.',
+            strategy: 'Upper Z3 Controlled: Ride at the top of your Tempo zone. It should feel \'comfortably tough\' but sustainable.',
+            mindset: 'No Wasted Watts: Every bit of power you put into the pedals should move you forward. Stay aero and steady.',
+            nutrition_before: '',
+            nutrition_during: 'Fueling: Consistently intake 70-80g of carbs per hour for sustained energy.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Shoes On, Settle Cadence: Get into your shoes quickly, then immediately focus on finding your target cadence of 90+ RPM.',
+            mindset: 'Instant Run Legs: Focus on a high-cadence, short stride to \'wake up\' your running muscles immediately.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Mid-run Fade: A mental and physical slump around the midway point of the run leg.',
+            strategy: 'Hold Pace then Kick: Maintain a steady, strong effort for the first 80% of the run, then \'empty the tank\' for the finish.',
+            mindset: 'Race the Run: The triathlon doesn\'t really start until the run. This is where the results are decided.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Full Recovery: High carb/protein meal within 1 hour. Prioritize anti-inflammatory foods.'
+          },
+        },
+        'Competitive': {
+          mistake: 'Surge Coverage: Being unable to respond to a tactical move by a competitor at a critical moment.',
+          strategy: 'Even Effort, Surge Late: Hold a steady pace for the majority of the segment, then attack in the final quarter.',
+          mindset: 'Race People: Use the athletes around you as \'tow trucks\' or targets. Competition is a powerful motivator.',
+          swim: {
+            mistake: 'Marginal Gains: The accumulation of small efficiencies that lead to a faster overall time.',
+            strategy: 'Explosive Precision: High-intensity efforts executed with total technical accuracy.',
+            mindset: 'Get Position Early: Fight for your spot in the swim or bike pack in the first few minutes so you can settle in.',
+            nutrition_before: 'Carb Optimized: Precision carb loading protocol tailored to your sweat rate and body weight 24-48 hours out.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Momentum Loss: Allowing speed to drop unnecessarily during turns, aid stations, or transitions.',
+            strategy: 'Highly Rehearsed: Your transition should be so well-practiced that you could do it with your eyes closed.',
+            mindset: 'This is Free Speed: Perfecting your gear and your transition is the cheapest way to get faster.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Run Sabotage: Pushing 5-10 watts too high on the bike, which costs you 5-10 minutes on the run.',
+            strategy: 'Low Z3 Steady Watts: Maintain consistent power in your lower \'Tempo\' zone, avoiding spikes on hills.',
+            mindset: 'Stay Legal: Don\'t risk a drafting penalty. The 5 minutes in the penalty tent are never worth the \'free\' speed.',
+            nutrition_before: '',
+            nutrition_during: 'High Fueling: Target 80-90g of carbs per hour to support long-duration power.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Breathe and Go: A quick mental reset and a deep breath, then immediate execution.',
+            mindset: 'Nothing Rushed: Moving at 90% speed with 100% accuracy is faster than 100% speed with 90% accuracy.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Surge Coverage: Being unable to respond to a tactical move by a competitor at a critical moment.',
+            strategy: 'Even Effort, Surge Late: Hold a steady pace for the majority of the segment, then attack in the final quarter.',
+            mindset: 'Race People: Use the athletes around you as \'tow trucks\' or targets. Competition is a powerful motivator.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Recovery Meal: Balanced meal (protein/complex carbs) within 2 hours. Focus on hydration.'
+          },
+        },
+        'Elite': {
+          mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+          strategy: 'Respond Selectively: Only cover surges from competitors that actually threaten your race goals.',
+          mindset: 'Race the Last 5K: The finish is close. This is the time to start \'spending\' whatever energy you have left.',
+          swim: {
+            mistake: 'Marginal Gains: The accumulation of small efficiencies that lead to a faster overall time.',
+            strategy: 'Hard but Relaxed: Maximum effort while keeping the face, neck, and shoulders completely loose.',
+            mindset: 'Win Clean Water: Aggressively seek a clear swimming line early to avoid the \'washing machine\' effect of the pack.',
+            nutrition_before: '3-day Carb Load: High carb load for 72 hours (8-10g/kg). Small carb snack 1 hour before the start.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Execution Errors: Mechanical mistakes, missed turns, or forgotten equipment due to high-intensity stress.',
+            strategy: 'Rehearsed Efficiency: Using muscle memory to move through segments with zero wasted motion.',
+            mindset: 'Every Second Counts: Respect the clock. A second saved in transition is as good as a second saved on the road.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Tactical Dynamics: Misreading the race flow or the moves of competitors, resulting in lost time.',
+            strategy: 'Upper Z3 Precise: Holding a specific, high-intensity power target with minimal deviation.',
+            mindset: 'Race People: Use the athletes around you as \'tow trucks\' or targets. Competition is a powerful motivator.',
+            nutrition_before: '',
+            nutrition_during: 'Elite Fueling: 90g+ of carbs per hour via hydrogel or liquid fuel. Requires high GI training.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Execution Speed: Moving too fast in transition resulting in errors, or too slow resulting in time loss.',
+            strategy: 'Clean and Fast: Prioritize a clean, error-free transition over a \'fast\' one; clean ends up being faster.',
+            mindset: 'Transition Violence: Move through T1 and T2 with extreme aggression and focus. Leave nothing on the table.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+            strategy: 'Respond Selectively: Only cover surges from competitors that actually threaten your race goals.',
+            mindset: 'Race the Last 5K: The finish is close. This is the time to start \'spending\' whatever energy you have left.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Rapid Refuel: 1.2g/kg of carbs + 25g protein immediately. Continue for 4 hours.'
+          },
+        },
       },
+
       'Full Ironman (140.6)': {
-        mistake: 'Racing the first half instead of preparing for the second.',
-        swim: 'Extremely controlled. Rhythm over position.',
-        bike: 'The number 1 key is your hydro/fueling plan! Conservative effort the first hour. Stay within your planned target wattage zones until special needs. Self-evaluation on modifying target wattage up or down in the back half. Increase cadence the final 5-10 minutes.',
-        run: 'First 6-8 miles conservative. Hold steady through the middle. Walk the aid stations to maximize hydro/nutrition, and cooling. The back half will be painful; embrace it and finish strong.',
-        mindset: 'Ironman is an execution event. You don\'t win it with heroics — you earn it with restraint.'
+        'Recreational': {
+          mistake: 'Glycogen Drop: A sudden drop in energy levels due to a failure to fuel early in the bike leg.',
+          strategy: 'Run/walk Early: Use a run/walk strategy from the very start of the run to manage core temperature and fatigue.',
+          mindset: 'Forward motion: Even when it hurts, keep moving toward the finish line. Every step brings you closer.',
+          swim: {
+            mistake: 'Anxiety: Pre-race or in-race stress that consumes mental energy and affects decision-making.',
+            strategy: 'Easy-fast Aerobic: A pace that feels \'easy\' but results in a \'fast\' time due to perfect efficiency.',
+            mindset: 'Bike Boring: If the bike leg feels \'boring\' and easy, you are likely pacing it perfectly for a strong run.',
+            nutrition_before: 'Carb Meal: Balanced meal with a heavy emphasis on complex carbs 3 hours prior. Hydrate well.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Rushing: Moving frantically rather than deliberately, which usually results in \'slow\' time.',
+            strategy: 'Deliberate Movements: Move through transition with purpose, not haste. Visualize each step of the process beforehand.',
+            mindset: 'Nothing Rushed: Moving at 90% speed with 100% accuracy is faster than 100% speed with 90% accuracy.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Snack: A quick gel or chew taken during transition or early in the segment.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Ego: Trying to race people early in the bike or run rather than sticking to your own prescribed power and heart rate zones.',
+            strategy: 'Low Z2 Discipline: Truly easy, aerobic effort. This is about patience and saving matches for the marathon.',
+            mindset: 'Forward Motion: Even when it hurts, keep moving toward the finish line. Every step brings you closer.',
+            nutrition_before: '',
+            nutrition_during: 'Fueling: Maintain a steady 60-70g of carbs per hour to avoid \'bonking\'.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Leg Shock: The jarring sensation of the first mile of the run when blood hasn\'t fully redistributed to the running muscles.',
+            strategy: 'Walk 20–30 sec: Use a scheduled walking break in T2 to lower your heart rate and prepare for a steady run.',
+            mindset: 'Stay Patient: The race is long. Don\'t let an early mistake or a slow segment derail your entire plan.',
+            nutrition_before: '',
+            nutrition_during: 'Optional Snack: Take a small carb snack if you feel your energy dipping.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Glycogen Drop: A sudden drop in energy levels due to a failure to fuel early in the bike leg.',
+            strategy: 'Run/walk Early: Use a run/walk strategy from the very start of the run to manage core temperature and fatigue.',
+            mindset: 'Forward motion: Even when it hurts, keep moving toward the finish line. Every step brings you closer.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Aggressive Refuel: High calorie, high carb intake for 24 hours to address the deficit.'
+          },
+        },
+        'Intermediate': {
+          mistake: 'Mid-run Fade: A mental and physical slump around the midway point of the run leg.',
+          strategy: 'Controlled Tempo: A firm, rhythmic pace that feels like \'work\' but is sustainable for a long duration.',
+          mindset: 'Fuel Equals Pace: You can\'t run fast if your tank is empty. Nutrition is the primary limiter of performance.',
+          swim: {
+            mistake: 'Lost Focus: Allowing the mind to wander during long stretches, leading to a drop in pace or power.',
+            strategy: 'Smooth Aerobic: A relaxed, sustainable pace where you focus on technique and efficient breathing.',
+            mindset: 'Long and Relaxed: Focus on a long, efficient swim stroke and keeping your muscles loose.',
+            nutrition_before: 'Carb Load: Increase carb intake 24 hours prior. Final pre-race meal should be 80% carbs.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Cognitive Overload: Having too much to remember in T1 or T2, leading to missed steps (like leaving your helmet on).',
+            strategy: 'Practice Sequence: Every movement in transition should be a practiced habit. No thinking, just execution.',
+            mindset: 'Stay Patient: The race is long. Don\'t let an early mistake or a slow segment derail your entire plan.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Rushed Exit: Leaving T2 before your heart rate has stabilized or before your mind has shifted to the run.',
+            strategy: 'Deliberate Setup: Taking the extra 5 seconds in transition to ensure your nutrition and gear are perfectly placed.',
+            mindset: 'Clean Water: Find your own space in the swim to maintain your rhythm and avoid being hit.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Mid-run Fade: A mental and physical slump around the midway point of the run leg.',
+            strategy: 'Controlled Tempo: A firm, rhythmic pace that feels like \'work\' but is sustainable for a long duration.',
+            mindset: 'Fuel Equals Pace: You can\'t run fast if your tank is empty. Nutrition is the primary limiter of performance.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Multi-day recovery: Nutrient-dense meals and hydration for 3-5 days. Avoid intense activity.'
+          },
+        },
+        'Competitive': {
+          mistake: 'Entropy: The natural breakdown of gear, focus, and physical ability over the course of a long race.',
+          strategy: 'Even Effort: Maintain a constant level of intensity from start to finish, regardless of terrain.',
+          mindset: 'Race the Field: Use your competitors to gauge your effort and stay motivated in the final stages.',
+          swim: {
+            mistake: 'Pack Control: Failing to manage your position relative to others, risking penalties or inefficient lines.',
+            strategy: 'Hard but Controlled: A high-intensity effort that requires focus to maintain, but isn\'t an all-out sprint yet.',
+            mindset: 'Clean Water Matters: Finding a line away from the pack reduces drag and mental stress in the swim.',
+            nutrition_before: 'Carb Optimized: Precision carb loading protocol tailored to your sweat rate and body weight 24-48 hours out.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Fuel Execution: Forgetting to eat or drink according to the plan because you are too focused on the effort.',
+            strategy: 'Highly Rehearsed: Your transition should be so well-practiced that you could do it with your eyes closed.',
+            mindset: 'Race Late: The competition only truly begins in the second half of the run. Be ready for it.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Power Creep: Allowing your wattage to slowly drift upward during the ride as you feel \'good\', ending in a late-race crash.',
+            strategy: 'Mid Z2 Steady: Consistent, moderate effort in your \'Endurance\' zone. The goal is steady state.',
+            mindset: 'Position Matters: Tactical positioning in the water or a bike group can save you massive amounts of energy.',
+            nutrition_before: '',
+            nutrition_during: 'High Carb: Target 75–90g of carbs per hour. Train your gut in advance for this volume.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Mental Shift: The difficulty of transitioning the brain from \'bike mode\' (power/cadence) to \'run mode\' (form/turnover).',
+            strategy: 'Controlled Jog Out: Exiting T2 at a very easy pace to allow the body to adapt to the impact of running.',
+            mindset: 'No Waste: Focus on absolute efficiency in every movement, every breath, and every watt.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Entropy: The natural breakdown of gear, focus, and physical ability over the course of a long race.',
+            strategy: 'Even Effort: Maintain a constant level of intensity from start to finish, regardless of terrain.',
+            mindset: 'Race the Field: Use your competitors to gauge your effort and stay motivated in the final stages.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Full Rebuild: High protein/carb focus for 72 hours. Supplement with electrolytes.'
+          },
+        },
+        'Elite': {
+          mistake: 'Entropy management',
+          strategy: 'Even Effort, Surge Late: Hold a steady pace for the majority of the segment, then attack in the final quarter.',
+          mindset: 'Race the Last 5K: The finish is close. This is the time to start \'spending\' whatever energy you have left.',
+          swim: {
+            mistake: 'Tactical Separation: Missing the opportunity to create a gap or losing the \'draft\' of a legal group.',
+            strategy: 'Hard but Relaxed: Maximum effort while keeping the face, neck, and shoulders completely loose.',
+            mindset: 'Go Now: When it’s time to attack, don\'t hesitate. Commit fully to the move.',
+            nutrition_before: '3-day Carb Load: High carb load for 72 hours (8-10g/kg). Small carb snack 1 hour before the start.',
+            nutrition_during: 'None: Focus on your stroke; you will fuel on the bike.',
+            nutrition_after: ''
+          },
+          t1: {
+            mistake: 'Momentum: Allowing your speed to bleed away during technical sections or when fatigue sets in.',
+            strategy: 'Explosive but Clean: High-intensity movements that remain technically perfect to avoid errors.',
+            mindset: 'Make Moves: Be an active participant in the race. Don\'t just follow; look for opportunities to lead.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Priming: A fast-acting carb source (like a gel) to keep blood glucose steady.',
+            nutrition_after: ''
+          },
+          bike: {
+            mistake: 'Tactical Effort: Misallocating energy to sections of the course where the \'return on investment\' is low.',
+            strategy: 'Upper Z2 Precise: Staying at the very edge of your aerobic zone without crossing over into Tempo.',
+            mindset: 'This is a Warm-up: Treat the swim and bike as just a prelude to the \'real\' race, which is the run.',
+            nutrition_before: '',
+            nutrition_during: 'High Fueling: Target 80-90g of carbs per hour to support long-duration power.',
+            nutrition_after: ''
+          },
+          t2: {
+            mistake: 'Execution Speed: Moving too fast in transition resulting in errors, or too slow resulting in time loss.',
+            strategy: 'Clean and Fast: Prioritize a clean, error-free transition over a \'fast\' one; clean ends up being faster.',
+            mindset: 'Transition Violence: Move through T1 and T2 with extreme aggression and focus. Leave nothing on the table.',
+            nutrition_before: '',
+            nutrition_during: 'Carb Preload: Taking in calories immediately before a hard effort to ensure availability.',
+            nutrition_after: ''
+          },
+          run: {
+            mistake: 'Entropy management',
+            strategy: 'Even Effort, Surge Late: Hold a steady pace for the majority of the segment, then attack in the final quarter.',
+            mindset: 'Race the Last 5K: The finish is close. This is the time to start \'spending\' whatever energy you have left.',
+            nutrition_before: '',
+            nutrition_during: '',
+            nutrition_after: 'Structured Rebuild: Scientific recovery protocol focusing on amino acids and high-GI carbs.'
+          },
+        },
       },
-      'Custom Triathlon': {
-        mistake: 'Not adjusting strategy for your specific custom distance.',
-        swim: 'Controlled breathing and rhythm. Find your pace based on the distance.',
-        bike: 'Start conservative, build into your target power. Adjust fueling based on total bike duration.',
-        run: 'Ease into your pace. Let your heart rate guide your effort level.',
-        mindset: 'Execute your custom race with the same discipline as any standard distance.'
-      },
+
       '5K Run': {
-        mistake: 'Starting faster than goal pace because it feels "easy."',
-        strategy: 'Start at goal pace. Hold miles 1-2. Push the final mile.',
-        mindset: 'You don\'t race the first mile — you survive it well enough to race the last.'
+        'Recreational': {
+          mistake: 'Early Overexertion: The urge to sprint the first 400m because you feel \'fresh\' will ruin your finish.',
+          strategy: 'Start 10–20 sec/mile slower than goal pace. Build speed incrementally in the second half.',
+          mindset: 'Finish strong, not shocked: If you cross the line and immediately feel like you could have done more, you paced it perfectly. If you are gasping at mile 1, the race is already over.',
+          nutrition_before: 'Normal Meal: Eat a familiar, carb-rich meal (oatmeal, toast, or rice) 2–3 hours before. Avoid high fiber and fat.',
+          nutrition_during: 'None: 5K intensity is too high for heavy digestion; focus on small sips of water only if needed.',
+          nutrition_after: 'Recovery: 20g protein + 60g carbs within 45 mins. Prioritize easily digestible liquid recovery drinks.'
+        },
+        'Intermediate': {
+          mistake: 'Adrenaline Pacing: High heart rate from the start line adrenaline can lead to an early \'blow up\'.',
+          strategy: 'Hold back slightly in Mile 1. Find and lock into your goal pace during the middle miles.',
+          mindset: 'Spend fitness late: You have a finite amount of "speed coins" to spend. Don\'t throw them away in the first 5 minutes; save the biggest spend for the final 800 meters.',
+          nutrition_before: 'Light Carbs: Small, easily digestible carb snack (banana or applesauce) 60-90 mins before. Keep it light.',
+          nutrition_during: 'Optional Rinse: Use a carb mouth rinse (swish and spit) at the 2.5K mark to signal the brain for more power.',
+          nutrition_after: 'Snack: Small carb + protein snack (chocolate milk or bar) within 30 mins to jumpstart repair.'
+        },
+        'Competitive': {
+          mistake: 'Impatience: Attacking too early in the middle mile before you\'ve earned the right to suffer.',
+          strategy: 'Hit goal pace immediately. Dig deep and squeeze the pace for the final mile to the line.',
+          mindset: 'Controlled pain: Accept that mile 2 will be uncomfortable. Don\'t fight the discomfort—manage it until the final 1k, then let the fire burn.',
+          nutrition_before: 'Carb Snack: Simple sugars (gel or chews) 15-30 mins before the start to top off glycogen.',
+          nutrition_during: 'None: 5K intensity is too high for heavy digestion; focus on small sips of water only if needed.',
+          nutrition_after: 'Immediate: 50-75g of high-GI carbs immediately post-finish to replenish depleted glycogen.'
+        },
+        'Elite': {
+          mistake: 'Marginal Errors: A single mile that is 2 seconds off can cost you the podium at this level.',
+          strategy: 'Execute a surgical, precise start. Use a tactical, aggressive finish to secure your rank.',
+          mindset: 'Precision first: Every stride and every turn must be calculated. One tactical error in positioning is harder to fix than a drop in physical pace.',
+          nutrition_before: 'Carb Priming: High-GI carb snack 15 mins pre-race to ensure blood glucose is peaked for high intensity.',
+          nutrition_during: 'None: 5K intensity is too high for heavy digestion; focus on small sips of water only if needed.',
+          nutrition_after: 'Rapid Refuel: 1.2g/kg of carbs + 25g protein immediately. Continue high-carb intake for 4 hours.'
+        },
       },
+
       '10K Run': {
-        mistake: 'Overreaching at mile 2-3 and paying for it late.',
-        strategy: 'Controlled start. Hold steady through miles 3-5. Push the final mile.',
-        mindset: 'The 10K rewards patience and punishes impatience quietly.'
+        'Recreational': {
+          mistake: 'Fatigue Creep: The gradual, unnoticed loss of form and speed between miles 3 and 5.',
+          strategy: 'Be conservative for the first 2 miles. Focus on maintaining a relentless, steady effort mid-race.',
+          mindset: 'Hold effort: Focus on the sensation of your breathing and leg turnover. Don\'t let your mind wander; keep the pressure consistent like a steady flame.',
+          nutrition_before: 'Carb-Focused Meal: Balanced meal with a heavy emphasis on complex carbs 3 hours prior. Hydrate well.',
+          nutrition_during: 'Water Only: Focus on small sips of water at aid stations to manage thirst without stomach sloshing.',
+          nutrition_after: 'Recovery: 20g protein + 60g carbs within 45 mins. Prioritize easily digestible liquid recovery drinks.'
+        },
+        'Intermediate': {
+          mistake: 'Middle-Mile Fade: Losing mental focus when initial excitement wears off but the finish is still distant.',
+          strategy: 'Use even pacing throughout the first 7K. Begin pressing your pace aggressively for the final 3K.',
+          mindset: 'Calm early: Treat the first 5k like a business meeting—stay professional and composed. The second 5k is where the real work begins.',
+          nutrition_before: 'Carb Snack: Simple sugars (gel or chews) 15-30 mins before the start to top off glycogen.',
+          nutrition_during: 'Optional Gel: If the race exceeds 50 mins, take 1 gel at the 5K mark. Otherwise, focus on water.',
+          nutrition_after: 'Recovery Meal: Balanced meal (protein/complex carbs) within 2 hours. Focus on hydration and electrolytes.'
+        },
+        'Competitive': {
+          mistake: 'Over-Response: Chasing every surge from competitors and wasting energy too early in the race.',
+          strategy: 'Maintain an even effort for 5 miles. Aim for a negative split by running the final 1.2 miles faster.',
+          mindset: 'Race the last 3K: Everything before 7k is just setup. The race doesn\'t actually start until there are 3,000 meters left. Be the one who accelerates while others fade.',
+          nutrition_before: 'Carb Load: Increase carb intake 24 hours prior. Final pre-race meal should be 80% carbs.',
+          nutrition_during: 'Gel Optional: 1 gel or liquid carb intake at 5K if needed for late-race energy.',
+          nutrition_after: 'Immediate: 50-75g of high-GI carbs immediately post-finish to replenish depleted glycogen.'
+        },
+        'Elite': {
+          mistake: 'Tactical Surges: Failing to respond to or initiate key moves that break the competition pack.',
+          strategy: 'Run based on perceived effort. Use tactical surges late in the race to break competitors.',
+          mindset: 'Efficiency wins: In a field of equals, the runner who moves with the least amount of wasted energy wins. Stay relaxed in the face, shoulders, and hands.',
+          nutrition_before: 'Carb Optimized: Precision carb loading protocol tailored to your sweat rate and body weight 24-48 hours out.',
+          nutrition_during: 'Minimal: Focus on mouth rinsing or 15g of fast-acting liquid carbs mid-race.',
+          nutrition_after: 'Rapid Refuel: 1.2g/kg of carbs + 25g protein immediately. Continue high-carb intake for 4 hours.'
+        },
       },
+
       'Half Marathon': {
-        mistake: 'Banking time early.',
-        strategy: 'Conservative first 3 miles. Lock into rhythm mid-race. Negative split miles 10-13.',
-        mindset: 'The best half marathons feel boring early and powerful late.'
+        'Recreational': {
+          mistake: 'Limited Durability: Muscular endurance giving out before the 13.1-mile mark.',
+          strategy: 'Start conservative. Protect your muscular energy specifically for the final 5K stretch.',
+          mindset: 'Finish strong: Your goal is to be passing people in the final 3 miles. If you\'re being passed, you went out too fast. Protect the legs.',
+          nutrition_before: 'Carb-Focused Meal: Balanced meal with a heavy emphasis on complex carbs 3 hours prior. Hydrate well.',
+          nutrition_during: 'Optional Gel: If the race exceeds 50 mins, take 1 gel at the 5K mark. Otherwise, focus on water.',
+          nutrition_after: 'Recovery: 20g protein + 60g carbs within 45 mins. Prioritize easily digestible liquid recovery drinks.'
+        },
+        'Intermediate': {
+          mistake: 'Early Enthusiasm: Letting downhills or crowds push you 10-15s too fast in the first 3 miles.',
+          strategy: 'Run a disciplined, even first half. Gradually increase the pressure throughout the second half.',
+          mindset: 'Patience buys speed: Every second you "save" by going too fast in the first 5 miles will cost you a minute in the last 3 miles. Pay for your finish with early patience.',
+          nutrition_before: 'Full Prep: High-carb dinner the night before + a light, familiar carb breakfast 3 hours before start.',
+          nutrition_during: 'Gel Protocol: 1 energy gel with water every 40–45 minutes. Maintain a steady trickle of 30-45g carbs/hour.',
+          nutrition_after: '3:1 Ratio: 3 parts carbohydrate to 1 part protein. A recovery drink is ideal to manage fluid loss.'
+        },
+        'Competitive': {
+          mistake: 'Middle-Mile Fade: Losing mental focus when initial excitement wears off but the finish is still distant.',
+          strategy: 'Maintain perfectly even effort. Target a slight negative split by finishing the last 3 miles faster.',
+          mindset: 'Even is fast: Fluctuations in pace are expensive. A rock-steady rhythm is the most efficient way to a PR. Become a metronome.',
+          nutrition_before: 'Full Carb Prep: 48-hour high-carb protocol (8-10g/kg). Small carb snack 1 hour before the start.',
+          nutrition_during: 'Carb Intake: Target 60–75g of carbohydrates per hour using a mix of gels and sports drink.',
+          nutrition_after: 'Recovery Meal: Balanced meal (protein/complex carbs) within 2 hours. Focus on hydration and electrolytes.'
+        },
+        'Elite': {
+          mistake: 'Tactical vs Physiological: Balancing your body\'s hard limits against race positioning and surges.',
+          strategy: 'Pace primarily by internal effort levels. Initiate your final competitive surge late in the race.',
+          mindset: 'Earn the last 10K: The first 11K is the commute; the final 10K is the job. You have to arrive at the 11K mark fresh enough to start working.',
+          nutrition_before: 'Elite Protocol: Precision 48-72 hour carb load. Liquid carbs 2 hours pre-race to minimize GI weight.',
+          nutrition_during: 'High Carb: Target 75–90g of carbs per hour. Train your gut in advance to handle this high volume.',
+          nutrition_after: 'Rapid Refuel: 1.2g/kg of carbs + 25g protein immediately. Continue high-carb intake for 4 hours.'
+        },
       },
+
       'Full Marathon': {
-        mistake: 'Letting excitement dictate the first 10 miles.',
-        strategy: 'Very conservative first 10 miles. Manage miles 10-20. Grit miles 20-26 only if earned.',
-        mindset: 'Marathons aren\'t finished with courage — they\'re managed with discipline.'
-      }
+        'Recreational': {
+          mistake: 'Glycogen Depletion: \'Hitting the wall\' due to insufficient fueling or overly aggressive early pacing.',
+          strategy: 'Run a very conservative first half. Focus heavily on early fueling and staying relaxed.',
+          mindset: 'Fuel early, finish upright: Think of yourself as a hybrid car. If you run out of "battery" (glycogen), the engine stops. Eat early and often so you can walk tall across the line.',
+          nutrition_before: '48-Hr Carb Focus: Consistent high-carb meals for 2 full days. Prioritize low-fiber carbs like white rice or pasta.',
+          nutrition_during: 'Fueling: Target 40–60g of carbs per hour. Start early (Mile 3) and be consistent. Don\'t wait for hunger.',
+          nutrition_after: 'Aggressive Refeed: High calorie, high carb intake for 24 hours to address the massive energy deficit.'
+        },
+        'Intermediate': {
+          mistake: 'Late-Race Fade: Seeing your pace plummet after mile 20 due to muscle damage or fueling failure.',
+          strategy: 'Do nothing \'heroic\' or fast before mile 20. Protect your legs for the true race in the final 10K.',
+          mindset: 'Protect the last 10K: The marathon is a 20-mile warm-up for a 6.2-mile race. If you feel like a hero at mile 10, you are doing it wrong. Stay anonymous until mile 20.',
+          nutrition_before: 'Protocol: Full carb load + sodium loading (1500mg+) 2 hours before to expand plasma volume.',
+          nutrition_during: 'Fueling: Target 60–70g of carbs per hour. Use a mix of glucose and fructose for better absorption.',
+          nutrition_after: 'Recovery: High protein (30g) for muscle repair + aggressive sodium replacement to restore balance.'
+        },
+        'Competitive': {
+          mistake: 'Overconfidence: Thinking you can \'bank time\' early. Banked time is usually borrowed from the final 10K.',
+          strategy: 'Maintain even effort throughout. Focus on protecting your pace and form for the final 10K.',
+          mindset: 'Discipline wins: The race will try to tempt you to go faster in the first half. Resist. The most disciplined runner on the course is usually the one who achieves their goal.',
+          nutrition_before: 'Full Protocol: Scientific carb loading (10g/kg) and pre-race hydration with electrolytes.',
+          nutrition_during: 'Fueling: Target 70–90g of carbs per hour. Focus on high-carb liquid and gel sources. Add sodium.',
+          nutrition_after: 'Immediate: 50-75g of high-GI carbs immediately post-finish to replenish depleted glycogen.'
+        },
+        'Elite': {
+          mistake: 'Marginal Errors Compound: Small pacing or fueling mistakes that grow into massive problems in the final hour.',
+          strategy: 'Utilize precision effort-based pacing. Focus on total running efficiency and movement quality.',
+          mindset: 'Efficiency wins: At this speed, aerodynamic drag and mechanical efficiency are everything. Keep your stride compact and your upper body still. Don\'t fight the road.',
+          nutrition_before: 'Elite Protocol: Precision 48-72 hour carb load. Liquid carbs 2 hours pre-race to minimize GI weight.',
+          nutrition_during: 'Elite Fueling: 90g+ of carbs per hour via hydrogel or liquid fuel. Requires highly trained GI system.',
+          nutrition_after: 'Elite Reload: High-GI carbs immediately, followed by structured carb intake every 30 mins for 2 hours.'
+        },
+      },
+
+      '50 Mile Ultra': {
+        'Recreational': {
+          mistake: 'GI Tolerance: Nausea or stomach shutdown caused by poor pacing or incorrect nutrient mix.',
+          strategy: 'Incorporate walking on hills early. Maintain a steady, manageable jog on flats and descents.',
+          mindset: 'Eat before hungry: In an ultra, your stomach is the boss. If it shuts down, your legs follow. Keep the "conveyor belt" of calories moving even when you don\'t feel like it.',
+          nutrition_before: 'Ultra Prep: 3 days of high-carb, very low fiber intake to prevent GI distress. Big breakfast 4 hours before.',
+          nutrition_during: 'Ultra Fuel: Target 200–250 calories per hour. Prioritize real food early, transitioning to gels/liquids late.',
+          nutrition_after: 'Ultra Recovery: Small, carb-rich frequent meals for 6-12 hours post-race. Listen to your gut.'
+        },
+        'Intermediate': {
+          mistake: 'Pacing Discipline: The difficulty of staying slow early when you feel strong, leading to late-race collapse.',
+          strategy: 'Run a very conservative first 25 miles. Save your mental and physical energy for the second half.',
+          mindset: 'Smooth beats strong: Aggressive running on technical terrain is fun for 10 miles but deadly for 50. Aim for a "liquid" movement style that preserves your quads for the final 15 miles.',
+          nutrition_before: 'Ultra Prep: Targeted carb loading plus high sodium intake to prepare for massive sweat loss.',
+          nutrition_during: 'Ultra Fuel: Target 250–300 calories per hour. Include sodium (500mg+/hr) and small amounts of protein.',
+          nutrition_after: 'Rehydration: Drink 1.5L of fluid for every 1kg of weight lost. Include high sodium and carbs.'
+        },
+        'Competitive': {
+          mistake: 'Heat and Fueling: Managing core temperature while maintaining a high caloric intake.',
+          strategy: 'Maintain a consistent power output, adapting your pace to the terrain and environmental heat.',
+          mindset: 'Relentless motion: Don\'t let your transitions or aid stations become "picnics." Minimize the time your feet aren\'t moving toward the finish line. Constant, steady movement is your goal.',
+          nutrition_before: 'Carb Optimized: Precision carb loading protocol tailored to your sweat rate and body weight 24-48 hours out.',
+          nutrition_during: 'High Calorie: Target 300+ calories per hour. High precision with electrolytes is required to prevent GI issues.',
+          nutrition_after: 'Full Recovery: High carb/protein meal within 1 hour. Prioritize anti-inflammatory foods and hydration.'
+        },
+        'Elite': {
+          mistake: 'Sleep and Efficiency: Maintaining focus and movement quality through extreme fatigue and overnight hours.',
+          strategy: 'Execute high-precision pacing from the start. Manage every mile to ensure maximal speed.',
+          mindset: 'Calories equal speed: You aren\'t just an athlete; you are a combustion engine. Your ability to process fuel under high aerobic stress is what separates the podium from the pack.',
+          nutrition_before: 'Scientific Load: Precision 3-day taper and carb load. Individualized sodium loading based on sweat test.',
+          nutrition_during: 'Elite Ultra: 300–350 calories per hour. High reliance on liquid nutrition to maintain speed.',
+          nutrition_after: 'Structured Rebuild: Scientific recovery protocol focusing on amino acids, high-GI carbs, and sleep.'
+        },
+      },
+
+      '100 Mile Ultra': {
+        'Recreational': {
+          mistake: 'Completion: Managing the overwhelming mental and physical distance just to cross the finish line.',
+          strategy: 'Walk all inclines early. Focus on foot hygiene and protecting your feet from blisters and hotspots.',
+          mindset: 'Forward is success: In a 100-miler, things will go wrong. Your job isn\'t to be perfect; it\'s to solve the problem and keep moving forward. One mile at a time.',
+          nutrition_before: '100M Prep: Focus on carb-heavy meals for 4 days. Final meal should be substantial but 4 hours before start.',
+          nutrition_during: 'Ultra Fuel: Target 200–250 calories per hour. Prioritize real food early, transitioning to gels/liquids late.',
+          nutrition_after: 'Long Recovery: Focus on nutrient-dense meals and hydration for 3-5 days. Avoid intense activity.'
+        },
+        'Intermediate': {
+          mistake: 'Sleep Deprivation: Hallucinations and cognitive decline during the second night on trail.',
+          strategy: 'Implement strict run/walk cycles from the start. Solve physical or mental problems early before they grow.',
+          mindset: 'Solve problems early: A small blister at mile 30 is a DNF at mile 80. A slight sour stomach at noon is a disaster at midnight. Fix every issue the moment it appears.',
+          nutrition_before: 'Protocol: High carb load combined with aggressive electrolyte loading to prepare for multi-day stress.',
+          nutrition_during: 'Ultra Fuel: Target 250–300 calories per hour. Include sodium (500mg+/hr) and small amounts of protein.',
+          nutrition_after: 'Multi-Day Rebuild: High protein/carb focus for 72 hours. Supplement with antioxidants and electrolytes.'
+        },
+        'Competitive': {
+          mistake: 'Mental Fatigue: Losing the \'will to move\' and wasting excessive time at aid stations.',
+          strategy: 'Focus on high-speed, efficient aid station transitions. Minimize time spent sitting or idle.',
+          mindset: 'Nothing wasted: Every minute you spend sitting in a chair is a minute you aren\'t racing. Treat aid stations like pit stops in Formula 1. Get in, get out, get gone.',
+          nutrition_before: 'Carb Optimized: Precision carb loading protocol tailored to your sweat rate and body weight 24-48 hours out.',
+          nutrition_during: 'Elite Ultra: 300–350 calories per hour. High reliance on liquid nutrition to maintain speed.',
+          nutrition_after: 'Aggressive Refeed: High calorie, high carb intake for 24 hours to address the massive energy deficit.'
+        },
+        'Elite': {
+          mistake: 'Entropy management',
+          strategy: 'Precision execution',
+          mindset: 'Manage entropy: The race is a battle against the second law of thermodynamics. Systems will break, calories will fail, and focus will slip. Your only job is to slow the rate of decay.',
+          nutrition_before: 'Scientific Protocol: Scientific carb loading (10g/kg) and pre-race hydration with electrolytes.',
+          nutrition_during: 'Elite Protocol: 350+ calories per hour. Precision timing to manage systemic energy levels.',
+          nutrition_after: 'Structured Rebuild: Scientific recovery protocol focusing on amino acids, high-GI carbs, and sleep.'
+        },
+      },
+
     };
-    return strategies[raceType];
+    
+    // For running races, return athlete-level-specific strategy
+    if (strategies[raceType] && typeof strategies[raceType] === 'object' && strategies[raceType][athleteLevel]) {
+      return strategies[raceType][athleteLevel];
+    }
+    
+    // Fallback to Intermediate if athlete level not found
+    if (strategies[raceType] && strategies[raceType]['Intermediate']) {
+      return strategies[raceType]['Intermediate'];
+    }
+    
+    // Final fallback
+    return strategies['Olympic Triathlon'] ? strategies['Olympic Triathlon']['Intermediate'] : {};
   };
 
   const getPacingZones = (raceType) => {const zones = {
@@ -286,7 +1179,9 @@ export default function RacePacingCalculator() {
       '5K Run': { runHR: 0.96, runPower: 1.12, runPace: 1.03, rpe: '9/10' },
       '10K Run': { runHR: 0.93, runPower: 1.07, runPace: 0.98, rpe: '8/10' },
       'Half Marathon': { runHR: 0.89, runPower: 0.97, runPace: 0.90, rpe: '7/10' },
-      'Full Marathon': { runHR: 0.86, runPower: 0.92, runPace: 0.87, rpe: '7/10' }
+      'Full Marathon': { runHR: 0.86, runPower: 0.92, runPace: 0.87, rpe: '7/10' },
+      '50 Mile Ultra': { runHR: 0.80, runPower: 0.80, runPace: 0.75, rpe: '5-6/10' },
+      '100 Mile Ultra': { runHR: 0.75, runPower: 0.75, runPace: 0.70, rpe: '4-5/10' }
     };
     
     const result = zones[raceType];if (!result) {
@@ -339,7 +1234,7 @@ export default function RacePacingCalculator() {
       throw new Error('No zones found for: ' + formData.raceType);
     }
     
-    const strategy = getRaceStrategy(formData.raceType);if (!strategy) {
+    const strategy = getRaceStrategy(formData.raceType, formData.athleteLevel);if (!strategy) {
       alert('ERROR: No strategy found for race type: ' + formData.raceType);
       throw new Error('No strategy found for: ' + formData.raceType);
     }
@@ -737,7 +1632,7 @@ Estimated Time: ${results.swim.estimatedTime}
 Effort Level: ${results.swim.effort}
 CSS (Critical Swim Speed): ${results.css}
 
-Strategy: ${results.strategy.swim}
+Strategy: ${results.strategy.swim ? results.strategy.swim.strategy : 'Focus on efficient technique'}
 `;
       } else {
         content += `
@@ -779,7 +1674,7 @@ Estimated Time: ${results.bike.estimatedTime}
 Effort Level: ${results.bike.effort}
 FTP (Functional Threshold Power): ${results.ftp}W
 
-Strategy: ${results.strategy.bike}
+Strategy: ${results.strategy.bike ? results.strategy.bike.strategy : 'Maintain steady power output'}
 `;
       } else {
         content += `
@@ -819,7 +1714,7 @@ Estimated Time: ${results.run.estimatedTime}
 Effort Level: ${results.run.effort}
 Threshold Pace: ${results.runThresholdPace}
 
-Strategy: ${results.strategy.run}
+Strategy: ${results.strategy.run ? results.strategy.run.strategy : 'Pace by effort and heart rate'}
 `;
       } else {
         content += `
@@ -851,10 +1746,6 @@ Estimated Finish Time: ${results.run.estimatedTime}
 Effort Level: ${results.run.effort}
 RPE: ${results.zones.rpe}
 Threshold Pace: ${results.runThresholdPace}
-
-RACE STRATEGY
-${'-'.repeat(60)}
-${results.strategy.strategy}
 `;
       } else {
         content += `
@@ -867,7 +1758,18 @@ Required Pace: ${results.run.requiredPace}/mi
     content += `
 RACE EXECUTION GUIDANCE
 ${'='.repeat(60)}
+`;
 
+    // Add race execution strategy if available
+    if (results.strategy.strategy) {
+      content += `
+RACE EXECUTION STRATEGY
+${'-'.repeat(60)}
+${results.strategy.strategy}
+`;
+    }
+
+    content += `
 PRIMARY MISTAKE TO AVOID
 ${'-'.repeat(60)}
 ${results.strategy.mistake}
@@ -875,7 +1777,26 @@ ${results.strategy.mistake}
 KEY MINDSET
 ${'-'.repeat(60)}
 ${results.strategy.mindset}
+`;
 
+    // Add nutrition guidance for running races with athlete-level strategies
+    if (results.strategy.nutrition_before) {
+      content += `
+NUTRITION STRATEGY
+${'-'.repeat(60)}
+
+Before the Race:
+${results.strategy.nutrition_before}
+
+During the Race:
+${results.strategy.nutrition_during}
+
+After the Race:
+${results.strategy.nutrition_after}
+`;
+    }
+
+    content += `
 THE KEYSTONE RULE
 ${'-'.repeat(60)}
 Restraint early. Discipline in the middle. Execution late.
@@ -1269,7 +2190,7 @@ ${'='.repeat(60)}
 
               {formData.raceCategory === 'running' && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                  {['5K Run', '10K Run', 'Half Marathon', 'Full Marathon'].map(race => (
+                  {['5K Run', '10K Run', 'Half Marathon', 'Full Marathon', '50 Mile Ultra', '100 Mile Ultra'].map(race => (
                     <div
                       key={race}
                       onClick={() => updateFormData('raceType', race)}
@@ -1398,14 +2319,14 @@ ${'='.repeat(60)}
                 </div>
               </div>
               
-              {/* Athlete Level Selection - Only for Current Fitness */}
-              {formData.pacingApproach === 'fitness' && (
+              {/* Athlete Level Selection - For BOTH approaches */}
+              {formData.pacingApproach && (
                 <div style={{ marginTop: '25px', padding: '20px', background: `${colors.primary}08`, borderRadius: '12px', border: `2px solid ${colors.primary}30` }}>
                   <h3 style={{ fontSize: '18px', marginBottom: '15px', color: colors.charcoal, fontWeight: '700' }}>
                     YOUR ATHLETE LEVEL
                   </h3>
                   <div style={{ fontSize: '14px', color: '#666', marginBottom: '15px', lineHeight: '1.6' }}>
-                    This helps us adjust your threshold calculations to match your training experience
+                    This helps us tailor your pacing strategy to your experience and training volume
                   </div>
                   <div style={{ display: 'grid', gap: '12px' }}>
                     {[
@@ -1447,9 +2368,11 @@ ${'='.repeat(60)}
                           <div style={{ fontWeight: '700', fontSize: '16px', color: colors.charcoal }}>
                             {level}
                           </div>
-                          <div style={{ fontSize: '13px', fontWeight: '600', color: colors.primary, background: `${colors.primary}15`, padding: '3px 8px', borderRadius: '4px' }}>
-                            {pct} threshold
-                          </div>
+                          {formData.pacingApproach === 'fitness' && (
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: colors.primary, background: `${colors.primary}15`, padding: '3px 8px', borderRadius: '4px' }}>
+                              {pct} threshold
+                            </div>
+                          )}
                         </div>
                         <div style={{ fontSize: '13px', color: '#666', lineHeight: '1.5' }}>
                           {desc}
@@ -1480,18 +2403,18 @@ ${'='.repeat(60)}
                 </button>
                 <button
                   onClick={nextStep}
-                  disabled={!formData.pacingApproach || (formData.pacingApproach === 'fitness' && !formData.athleteLevel)}
+                  disabled={!formData.pacingApproach || !formData.athleteLevel}
                   style={{
                     flex: 2,
                     padding: '16px',
                     fontSize: '18px',
                     fontWeight: 'bold',
-                    background: (formData.pacingApproach && (formData.pacingApproach === 'target' || formData.athleteLevel)) ? colors.primary : '#cccccc',
+                    background: (formData.pacingApproach && formData.athleteLevel) ? colors.primary : '#cccccc',
                     color: 'white',
                     border: 'none',
                     borderRadius: '12px',
-                    cursor: (formData.pacingApproach && (formData.pacingApproach === 'target' || formData.athleteLevel)) ? 'pointer' : 'not-allowed',
-                    boxShadow: (formData.pacingApproach && (formData.pacingApproach === 'target' || formData.athleteLevel)) ? `0 6px 20px ${colors.primary}60` : 'none',
+                    cursor: (formData.pacingApproach && formData.athleteLevel) ? 'pointer' : 'not-allowed',
+                    boxShadow: (formData.pacingApproach && formData.athleteLevel) ? `0 6px 20px ${colors.primary}60` : 'none',
                     letterSpacing: '0.5px'
                   }}
                 >
@@ -1681,6 +2604,22 @@ ${'='.repeat(60)}
                       <div>• Sub-3:00:00 (elite)</div>
                     </>
                   )}
+                  {formData.raceType === '50 Mile Ultra' && (
+                    <>
+                      <div>• Sub-12:00:00 (finish)</div>
+                      <div>• Sub-10:00:00 (competitive)</div>
+                      <div>• Sub-8:00:00 (advanced)</div>
+                      <div>• Sub-7:00:00 (elite)</div>
+                    </>
+                  )}
+                  {formData.raceType === '100 Mile Ultra' && (
+                    <>
+                      <div>• Sub-30:00:00 (finish)</div>
+                      <div>• Sub-24:00:00 (competitive)</div>
+                      <div>• Sub-20:00:00 (advanced)</div>
+                      <div>• Sub-18:00:00 (elite)</div>
+                    </>
+                  )}
                   {formData.raceType === 'Half Marathon' && (
                     <>
                       <div>• Sub-2:00:00 (common goal)</div>
@@ -1741,6 +2680,7 @@ ${'='.repeat(60)}
                 <input type="hidden" name="targetTime" value={formData.targetTime} />
                 <input type="hidden" name="age" value={formData.age} />
                 <input type="hidden" name="gender" value={formData.gender} />
+                <input type="hidden" name="athleteLevel" value={formData.athleteLevel} />
                 <input type="hidden" name="calculatorType" value="Race Pacing Calculator" />
                 <input type="hidden" name="_subject" value="New Race Pacing Strategy Request" />
                 
@@ -1954,6 +2894,7 @@ ${'='.repeat(60)}
                 <input type="hidden" name="pacingApproach" value={formData.pacingApproach} />
                 <input type="hidden" name="age" value={formData.age} />
                 <input type="hidden" name="gender" value={formData.gender} />
+                <input type="hidden" name="athleteLevel" value={formData.athleteLevel} />
                 <input type="hidden" name="maxHR" value={formData.maxHR} />
                 <input type="hidden" name="restingHR" value={formData.restingHR} />
                 <input type="hidden" name="css" value={formData.css} />
@@ -2126,7 +3067,7 @@ ${'='.repeat(60)}
                     </div>
                     {results.approach === 'fitness' && (
                       <div style={{ background: 'white', padding: '15px', borderRadius: '8px', lineHeight: '1.6', fontSize: '14px', color: colors.charcoal }}>
-                        <strong>Strategy:</strong> {results.strategy.swim}
+                        <strong>Strategy:</strong> {results.strategy.swim ? results.strategy.swim.strategy : 'Focus on efficient technique'}
                       </div>
                     )}
                   </div>
@@ -2197,7 +3138,7 @@ ${'='.repeat(60)}
                     </div>
                     {results.approach === 'fitness' && (
                       <div style={{ background: 'white', padding: '15px', borderRadius: '8px', lineHeight: '1.6', fontSize: '14px', color: colors.charcoal }}>
-                        <strong>Strategy:</strong> {results.strategy.bike}
+                        <strong>Strategy:</strong> {results.strategy.bike ? results.strategy.bike.strategy : 'Maintain steady power output'}
                       </div>
                     )}
                   </div>
@@ -2270,7 +3211,7 @@ ${'='.repeat(60)}
                     </div>
                     {results.approach === 'fitness' && (
                       <div style={{ background: 'white', padding: '15px', borderRadius: '8px', lineHeight: '1.6', fontSize: '14px', color: colors.charcoal }}>
-                        <strong>Strategy:</strong> {results.strategy.run}
+                        <strong>Strategy:</strong> {results.strategy.run ? results.strategy.run.strategy : 'Pace by effort and heart rate'}
                       </div>
                     )}
                   </div>
@@ -2645,11 +3586,18 @@ ${'='.repeat(60)}
                       <div style={{ fontSize: '32px', fontWeight: '800' }}>{results.run.estimatedTime}</div>
                     </div>
                   )}
-                  {results.approach === 'fitness' && (
-                    <div style={{ background: 'white', padding: '15px', borderRadius: '8px', lineHeight: '1.6', fontSize: '14px', color: colors.charcoal }}>
-                      <strong>Strategy:</strong> {results.strategy.strategy}
-                    </div>
-                  )}
+                </div>
+              )}
+
+              {/* RACE EXECUTION STRATEGY - Blue Box */}
+              {results.strategy.strategy && (
+                <div style={{ marginBottom: '30px', padding: '20px', background: '#e3f2fd', borderRadius: '12px', border: '2px solid #2196f3' }}>
+                  <h3 style={{ fontSize: '18px', color: colors.charcoal, marginBottom: '12px', fontWeight: '700' }}>
+                    RACE EXECUTION STRATEGY
+                  </h3>
+                  <p style={{ fontSize: '14px', lineHeight: '1.6', color: colors.charcoal }}>
+                    {results.strategy.strategy}
+                  </p>
                 </div>
               )}
 
@@ -2668,6 +3616,39 @@ ${'='.repeat(60)}
                   {results.strategy.mindset}
                 </p>
               </div>
+
+              {/* NUTRITION GUIDANCE (for running races with athlete-level strategies) */}
+              {results.strategy.nutrition_before && (
+                <div style={{ marginBottom: '30px', padding: '20px', background: '#e8f5e9', borderRadius: '12px', border: '2px solid #66bb6a' }}>
+                  <h3 style={{ fontSize: '18px', color: colors.charcoal, marginBottom: '15px', fontWeight: '700' }}>
+                    NUTRITION STRATEGY
+                  </h3>
+                  <div style={{ marginBottom: '12px' }}>
+                    <h4 style={{ fontSize: '15px', color: colors.charcoal, marginBottom: '6px', fontWeight: '600' }}>
+                      Before the Race:
+                    </h4>
+                    <p style={{ fontSize: '14px', lineHeight: '1.6', color: colors.charcoal }}>
+                      {results.strategy.nutrition_before}
+                    </p>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <h4 style={{ fontSize: '15px', color: colors.charcoal, marginBottom: '6px', fontWeight: '600' }}>
+                      During the Race:
+                    </h4>
+                    <p style={{ fontSize: '14px', lineHeight: '1.6', color: colors.charcoal }}>
+                      {results.strategy.nutrition_during}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '15px', color: colors.charcoal, marginBottom: '6px', fontWeight: '600' }}>
+                      After the Race:
+                    </h4>
+                    <p style={{ fontSize: '14px', lineHeight: '1.6', color: colors.charcoal }}>
+                      {results.strategy.nutrition_after}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* THE KEYSTONE RULE */}
               <div style={{ marginBottom: '30px', padding: '25px 20px', background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.maroon} 100%)`, borderRadius: '12px', textAlign: 'center', color: 'white' }}>
