@@ -471,7 +471,7 @@ export default function RacePacingCalculator() {
           },
           bike: {
             mistake: 'Power Creep: Allowing your wattage to slowly drift upward during the ride as you feel \'good\', ending in a late-race crash.',
-            strategy: 'Low Z2 Discipline: Truly easy, aerobic effort. This is about patience and saving matches for the marathon.',
+            strategy: 'Low Z2 Discipline: Truly easy, aerobic effort. This is about patience and saving matches for the race.',
             mindset: 'Run the Plan: Ignore what others are doing. Stick to your prescribed heart rate and pace zones.',
             nutrition_before: '',
             nutrition_during: 'Fueling: Target 60–75g of carbs per hour. Be consistent; don\'t wait for hunger.',
@@ -792,7 +792,7 @@ export default function RacePacingCalculator() {
           },
           bike: {
             mistake: 'Ego: Trying to race people early in the bike or run rather than sticking to your own prescribed power and heart rate zones.',
-            strategy: 'Low Z2 Discipline: Truly easy, aerobic effort. This is about patience and saving matches for the marathon.',
+            strategy: 'Low Z2 Discipline: Truly easy, aerobic effort. This is about patience and saving matches for the race.',
             mindset: 'Forward Motion: Even when it hurts, keep moving toward the finish line. Every step brings you closer.',
             nutrition_before: '',
             nutrition_during: 'Fueling: Maintain a steady 60-70g of carbs per hour to avoid \'bonking\'.',
